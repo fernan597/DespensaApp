@@ -6,7 +6,7 @@ import { createUser } from "../../../services/userService";
 const initialFormData = {
     name: "",
     email: "",
-    role: "dueño",
+    role: "admin_despensa",
     password: "",
     password_confirmation: "",
 };
@@ -171,9 +171,9 @@ export function UserModal({ isOpen, onClose, onUserCreated }) {
                             onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
                             className="w-full h-10 pl-10 pr-8 bg-surface-container rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
                         >
-                            <option value="dueño">Vendedor (Dueño) — Gestión de productos y stock</option>
-                            <option value="empleado">Cajero (Empleado) — Punto de venta y cobro</option>
-                            <option value="admin">Administrador — Control total del sistema</option>
+                            <option value="admin_despensa">Administrador Despensa</option>
+                            <option value="empleado">Cajero / Emplead</option>
+                            <option value="admin">Administrador del Sitio Web</option>
                         </select>
                         <span className="material-symbols-outlined absolute right-3 text-outline pointer-events-none text-[20px]">
                             expand_more
@@ -198,9 +198,8 @@ export function UserModal({ isOpen, onClose, onUserCreated }) {
                                 setFormData((prev) => ({ ...prev, password: e.target.value }));
                                 if (formErrors.password) setFormErrors((prev) => ({ ...prev, password: "" }));
                             }}
-                            className={`w-full h-10 pl-10 pr-10 bg-surface-container rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary ${
-                                formErrors.password ? "ring-2 ring-error bg-error-container/10" : ""
-                            }`}
+                            className={`w-full h-10 pl-10 pr-10 bg-surface-container rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary ${formErrors.password ? "ring-2 ring-error bg-error-container/10" : ""
+                                }`}
                             placeholder="Mínimo 8 caracteres"
                         />
                         <button
@@ -239,9 +238,8 @@ export function UserModal({ isOpen, onClose, onUserCreated }) {
                                     setFormErrors((prev) => ({ ...prev, password_confirmation: "" }));
                                 }
                             }}
-                            className={`w-full h-10 pl-10 pr-10 bg-surface-container rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary ${
-                                formErrors.password_confirmation ? "ring-2 ring-error bg-error-container/10" : ""
-                            }`}
+                            className={`w-full h-10 pl-10 pr-10 bg-surface-container rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary ${formErrors.password_confirmation ? "ring-2 ring-error bg-error-container/10" : ""
+                                }`}
                             placeholder="Repite la contraseña"
                         />
                         <button

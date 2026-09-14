@@ -69,9 +69,8 @@ export function RolePermissions({ userCount = 0 }) {
                                 </span>
                             </div>
                             <span
-                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${
-                                    openPermissions.administrador ? "rotate-180" : ""
-                                }`}
+                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${openPermissions.administrador ? "rotate-180" : ""
+                                    }`}
                             >
                                 expand_more
                             </span>
@@ -105,13 +104,12 @@ export function RolePermissions({ userCount = 0 }) {
                             <div className="flex items-center gap-sm">
                                 <span className="w-2 h-2 rounded-full bg-secondary"></span>
                                 <span className="font-label-md text-sm text-on-surface font-semibold">
-                                    Vendedor (Dueño)
+                                    Administrador de la Despensa
                                 </span>
                             </div>
                             <span
-                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${
-                                    openPermissions.vendedor ? "rotate-180" : ""
-                                }`}
+                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${openPermissions.vendedor ? "rotate-180" : ""
+                                    }`}
                             >
                                 expand_more
                             </span>
@@ -153,9 +151,8 @@ export function RolePermissions({ userCount = 0 }) {
                                 </span>
                             </div>
                             <span
-                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${
-                                    openPermissions.cajero ? "rotate-180" : ""
-                                }`}
+                                className={`material-symbols-outlined text-outline group-hover:text-primary transition-transform ${openPermissions.cajero ? "rotate-180" : ""
+                                    }`}
                             >
                                 expand_more
                             </span>

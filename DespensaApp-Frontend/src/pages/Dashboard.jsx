@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 export function Dashboard() {
     const { user, logout } = useAuth();
     const isAdmin = user?.role === "admin";
-    const isOwner = user?.role === "dueño";
+    const isAdminDespensa = user?.role === "admin_despensa";
 
 
     return (
@@ -71,7 +71,7 @@ export function Dashboard() {
                 )}
 
                 {/* Gestión de Productos - solo Owner */}
-                {isOwner && (
+                {isAdminDespensa && (
                     <div className="bg-secondary-container/20 border border-secondary/20 p-lg rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-md shadow-sm">
                         <div className="flex items-center gap-md">
                             <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
@@ -94,7 +94,7 @@ export function Dashboard() {
                 )}
 
                 {/* Placeholder si no tiene ninguna sección especial */}
-                {!isAdmin && !isOwner && (
+                {!isAdmin && !isAdminDespensa && (
                     <div className="bg-surface-container-lowest p-lg rounded-2xl border border-surface-container-high text-on-surface-variant text-center space-y-xs">
                         <span className="material-symbols-outlined text-outline text-[32px]">storefront</span>
                         <p className="font-label-md">Sección de ventas e inventario en desarrollo.</p>

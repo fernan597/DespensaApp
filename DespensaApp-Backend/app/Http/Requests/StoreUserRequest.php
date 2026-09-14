@@ -47,7 +47,7 @@ class StoreUserRequest extends FormRequest
                 'required',
                 Rule::in([
                     'admin',
-                    'dueño',
+                    'admin_despensa',
                     'empleado',
                 ]),
             ]

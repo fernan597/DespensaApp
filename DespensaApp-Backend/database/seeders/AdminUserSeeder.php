@@ -22,11 +22,11 @@ class AdminUserSeeder extends Seeder
             ]
         );
         User::updateOrCreate(
-            ['email' => 'dueno@gmail.com'],
+            ['email' => 'despensa@gmail.com'],
             [
                 'name'     => 'Administrador Despensa',
-                'password' => Hash::make('dueño1234'),
-                'role'     => 'dueño',
+                'password' => Hash::make('admindespensa1234'),
+                'role'     => 'admin_despensa',
             ]
         );
     }

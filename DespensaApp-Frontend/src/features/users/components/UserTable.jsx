@@ -15,15 +15,14 @@ const getRoleBadge = (role) => {
             return (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-on-primary-container mr-1.5"></span>
-                    Administrador
+                    Administrador del Sitio Web
                 </span>
             );
-        case "dueño":
-        case "vendedor":
+        case "admin_despensa":
             return (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-on-secondary-fixed mr-1.5"></span>
-                    Vendedor (Dueño)
+                    Administrador de la Despensa
                 </span>
             );
         case "empleado":
@@ -31,7 +30,7 @@ const getRoleBadge = (role) => {
             return (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-outline mr-1.5"></span>
-                    Cajero (Empleado)
+                    Cajero / Empleado
                 </span>
             );
         default:
@@ -83,9 +82,9 @@ export function UserTable({
                             className="appearance-none w-full h-11 px-3 bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface outline-none cursor-pointer pr-10"
                         >
                             <option value="">Rol: Todos</option>
-                            <option value="dueño">Vendedor (Dueño)</option>
-                            <option value="empleado">Cajero (Empleado)</option>
-                            <option value="admin">Administrador</option>
+                            <option value="admin_despensa">Administrador Despensa</option>
+                            <option value="empleado">Cajero / Empleado</option>
+                            <option value="admin">Administrador del Sitio Web</option>
                         </select>
                         <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">
                             expand_more
@@ -161,16 +160,14 @@ export function UserTable({
                                 users.map((u) => (
                                     <tr
                                         key={u.id}
-                                        className={`hover:bg-surface-container-low/50 transition-colors group ${
-                                            u.status === "inactive" ? "opacity-75" : ""
-                                        }`}
+                                        className={`hover:bg-surface-container-low/50 transition-colors group ${u.status === "inactive" ? "opacity-75" : ""
+                                            }`}
                                     >
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm ${
-                                                        u.avatarColor || getAvatarColor(u.role)
-                                                    }`}
+                                                    className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm ${u.avatarColor || getAvatarColor(u.role)
+                                                        }`}
                                                 >
                                                     {u.name ? u.name.charAt(0).toUpperCase() : "U"}
                                                 </div>

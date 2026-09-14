@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminRoute } from "./components/AdminRoute";
-import { DueñoRoute } from "./components/DueñoRoute";
+import { AdminDespensaRoute } from "./components/AdminDespensaRoute";
 import { LoginForm } from "./pages/login";
 import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
@@ -30,7 +30,7 @@ function App() {
               </Route>
 
               {/* Exclusivo Dueño / Gestión de Productos */}
-              <Route element={<DueñoRoute />}>
+              <Route element={<AdminDespensaRoute />}>
                 <Route path="/admin/productos" element={<AdminProducts />} />
               </Route>
 

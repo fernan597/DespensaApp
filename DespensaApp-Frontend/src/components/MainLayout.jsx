@@ -20,10 +20,9 @@ export function MainLayout() {
                         <NavLink
                             to="/admin/usuarios"
                             className={({ isActive }) =>
-                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${
-                                    isActive
-                                        ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
+                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                                 }`
                             }
                         >
@@ -33,14 +32,13 @@ export function MainLayout() {
                     )}
 
                     {/* Opción de Productos y Stock (Para el Dueño / Vendedor) */}
-                    {user?.role === "dueño" && (
+                    {user?.role === "admin_despensa" && (
                         <NavLink
                             to="/admin/productos"
                             className={({ isActive }) =>
-                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${
-                                    isActive
-                                        ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
+                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                                 }`
                             }
                         >
@@ -54,10 +52,9 @@ export function MainLayout() {
                         to="/"
                         end
                         className={({ isActive }) =>
-                            `flex items-center px-md py-md rounded-xl transition-all duration-200 ${
-                                isActive
-                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                            `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
+                                ? "bg-secondary-container text-on-secondary-container font-semibold"
+                                : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                             }`
                         }
                     >

@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export function DueñoRoute() {
+export function AdminDespensaRoute() {
     const { user, isAuthenticated, loading } = useAuth();
 
     if (loading) {
@@ -20,9 +20,9 @@ export function DueñoRoute() {
     }
 
 
-    const isDueño = user?.role === "dueño";
+    const isAdminDespensa = user?.role === "admin_despensa";
 
-    if (!isDueño) {
+    if (!isAdminDespensa) {
         return <Navigate to="/" replace />;
     }
 

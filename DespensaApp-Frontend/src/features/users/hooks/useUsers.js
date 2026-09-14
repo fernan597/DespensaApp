@@ -68,7 +68,7 @@ export function useUsers() {
         const matchesRole =
             roleFilter === "" ||
             u.role === roleFilter ||
-            (roleFilter === "dueño" && (u.role === "dueño" || u.role === "vendedor")) ||
+            (roleFilter === "admin_despensa" && (u.role === "admin_despensa")) ||
             (roleFilter === "empleado" && (u.role === "empleado" || u.role === "cajero")) ||
             (roleFilter === "admin" && (u.role === "admin" || u.role === "administrador"));
 

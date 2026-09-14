@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 
-    Route::middleware('role:dueño')->group(function () {
+    Route::middleware('role:admin_despensa')->group(function () {
         Route::get('/products', [ProductController::class, 'index']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/marcas/{id}', [MarcaController::class, 'destroy']);
     });
 
-    Route::middleware('role:dueño,empleado')->group(function () {
+    Route::middleware('role:admin_despensa,empleado')->group(function () {
         
     });
 
