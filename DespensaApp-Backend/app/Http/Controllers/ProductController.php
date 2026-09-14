@@ -76,4 +76,44 @@ class ProductController extends Controller
         }
     }
     
+    public function update($id, StoreProductRequest $request){
+        $validatedData = $request->validated();
+        try{
+            $product = Product::find($id);
+            if(!$product){
+                return response()->json([
+                    'message' => 'Producto no encontrado'
+                ], 404);
+            }
+            
+            $marcaId = $validatedData['marca_id'] ?? null;
+            if (!empty($validatedData['marca_nombre'])) {
+                $marca = Marca::firstOrCreate([
+                    'nombre' => trim($validatedData['marca_nombre'])
+                ]);
+                $marcaId = $marca->id;
+            }
+            
+            $product->update([
+                'nombre' => $validatedData['name'],
+                'codigo_barra' => $validatedData['codigo_barra'],
+                'stock_actual' => $validatedData['stock_actual'],
+                'stock_minimo' => $validatedData['stock_minimo'],
+                'precio_compra' => $validatedData['precio_compra'],
+                'precio_venta' => $validatedData['precio_venta'],
+                'categoria_id' => $validatedData['categoria_id'],
+                'marca_id' => $marcaId,
+            ]);
+            $product->load(['categoria:id,nombre', 'marca:id,nombre']);
+            return response()->json([
+                'message' => 'Producto actualizado exitosamente',
+                'product' => new ProductResource($product),
+            ]);
+        }catch(\Exception $error){
+            return response()->json([
+                'message' => 'Error al actualizar el producto',
+                'error' => $error->getMessage()
+            ], 500);
+        }
+    }
 }

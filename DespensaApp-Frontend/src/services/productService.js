@@ -23,6 +23,19 @@ export async function createProduct(productData) {
     }
 }
 
+export async function updateProduct(id, productData) {
+    try {
+        const response = await apiFetch(`/products/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(productData),
+        });
+        return response.product;
+    } catch (error) {
+        console.error("Error al actualizar producto:", error);
+        throw error;
+    }
+}
+
 export async function deleteProduct(id) {
     try {
         const response = await apiFetch(`/products/${id}`, {

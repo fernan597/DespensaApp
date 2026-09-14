@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getProducts, createProduct, deleteProduct } from "../services/productService";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "../services/productService";
 import { getCategories, createCategory } from "../services/categoryService";
 import { getMarcas } from "../services/marcaService";
+import { useBarcodeScanner } from "../hooks/useBarcodeScanner";
 
 export function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -36,6 +37,30 @@ export function AdminProducts() {
     const [categoryError, setCategoryError] = useState("");
 
     const searchInputRef = useRef(null);
+
+    // Conexión del Hook para pistola lectora de códigos de barra (USB HID)
+    useBarcodeScanner((scannedCode) => {
+        if (isModalOpen) {
+            // Si el modal de producto está abierto, autocompletar el código de barras
+            setFormData((prev) => ({
+                ...prev,
+                codigo_barra: scannedCode,
+            }));
+            // Limpiar errores del código de barras si existían
+            setErrors((prev) => {
+                const nextErrors = { ...prev };
+                delete nextErrors.codigo_barra;
+                return nextErrors;
+            });
+        } else {
+            // Si el modal está cerrado, buscar el producto por código
+            setSearch(scannedCode);
+            if (searchInputRef.current) {
+                searchInputRef.current.focus();
+                searchInputRef.current.select();
+            }
+        }
+    });
 
     // Cargar metadatos (categorías y marcas)
     const fetchMetadata = async () => {
@@ -157,7 +182,11 @@ export function AdminProducts() {
         };
 
         try {
-            await createProduct(cleanData);
+            if (editingProduct) {
+                await updateProduct(editingProduct.id, cleanData);
+            } else {
+                await createProduct(cleanData);
+            }
             setIsModalOpen(false);
             fetchProducts(); // Recargar productos
             fetchMetadata(); // Recargar marcas por si se agregó una nueva
@@ -245,6 +274,13 @@ export function AdminProducts() {
                         className="w-full bg-transparent font-body-md text-on-surface placeholder:text-outline focus:outline-none"
                         autoFocus
                     />
+                    <span
+                        className="hidden sm:flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full border border-outline-variant/40 shrink-0 select-none"
+                        title="Pistola lectora activa en cualquier momento"
+                    >
+                        <span className="material-symbols-outlined text-[16px] text-primary">barcode_scanner</span>
+                        <span>Pistola activa</span>
+                    </span>
                     {search && (
                         <button onClick={() => setSearch("")} className="text-on-surface-variant hover:text-on-surface">
                             <span className="material-symbols-outlined text-[18px]">close</span>
@@ -351,7 +387,13 @@ export function AdminProducts() {
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                             {/* Código de barras */}
                             <div className="flex flex-col gap-1">
-                                <label className="text-xs font-medium text-on-surface">Código de Barras *</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-medium text-on-surface">Código de Barras *</label>
+                                    <span className="text-[11px] text-on-surface-variant flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[14px] text-primary">barcode_scanner</span>
+                                        Listo para escanear
+                                    </span>
+                                </div>
                                 <input
                                     type="text"
                                     required
@@ -508,7 +550,11 @@ export function AdminProducts() {
                                     className="px-5 py-2 bg-primary text-on-primary rounded-full text-sm font-medium hover:bg-primary-container hover:text-on-primary-container transition-all disabled:opacity-50 flex items-center gap-2"
                                 >
                                     {submitting && <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>}
-                                    {submitting ? "Guardando..." : "Guardar Producto"}
+                                    {submitting
+                                        ? "Guardando..."
+                                        : editingProduct
+                                        ? "Actualizar Producto"
+                                        : "Guardar Producto"}
                                 </button>
                             </div>
                         </form>
