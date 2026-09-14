@@ -21,5 +21,13 @@ class AdminUserSeeder extends Seeder
                 'role'     => 'admin',
             ]
         );
+        User::updateOrCreate(
+            ['email' => 'dueno@gmail.com'],
+            [
+                'name'     => 'Administrador Despensa',
+                'password' => Hash::make('dueño1234'),
+                'role'     => 'dueño',
+            ]
+        );
     }
 }

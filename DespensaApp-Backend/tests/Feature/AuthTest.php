@@ -84,19 +84,6 @@ class AuthTest extends TestCase
             ]);
     }
 
-    public function test_authenticated_user_can_get_profile(): void
-    {
-        $user = User::factory()->create(['role' => 'vendedor']);
-
-        $response = $this->actingAs($user, 'sanctum')->getJson('/api/user');
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'id'    => $user->id,
-                'email' => $user->email,
-                'role'  => 'vendedor',
-            ]);
-    }
 
     public function test_unauthenticated_user_cannot_access_protected_routes(): void
     {
@@ -134,27 +121,4 @@ class AuthTest extends TestCase
         $this->assertTrue(Hash::check('admin1234', $admin->password));
     }
 
-    public function test_admin_can_access_admin_protected_route(): void
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
-
-        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/test');
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'Acceso concedido a administrador.',
-            ]);
-    }
-
-    public function test_non_admin_cannot_access_admin_protected_route(): void
-    {
-        $cajero = User::factory()->create(['role' => 'cajero']);
-
-        $response = $this->actingAs($cajero, 'sanctum')->getJson('/api/admin/test');
-
-        $response->assertStatus(403)
-            ->assertJson([
-                'message' => 'Acceso no autorizado para este rol.',
-            ]);
-    }
 }

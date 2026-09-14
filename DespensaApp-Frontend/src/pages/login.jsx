@@ -67,7 +67,7 @@ export function LoginForm() {
                                 </span>
                             </div>
                             <h1 className="font-headline-lg text-2xl font-bold text-on-surface">Bienvenido</h1>
-                            <p className="font-body-md text-body-md text-on-surface-variant">Gestiona tu despensa con frescura</p>
+                            <p className="font-body-md text-body-md text-on-surface-variant">Gestiona tu despensa</p>
                         </div>
                         {/* Mensaje de error general */}
                         {generalError && (

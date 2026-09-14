@@ -24,7 +24,7 @@ class CheckRole
             ], 401);
         }
 
-        if (! in_array($user->role, $roles, true)) {
+        if (! $user->hasRole($roles)) {
             return response()->json([
                 'message' => 'Acceso no autorizado para este rol.',
             ], 403);
