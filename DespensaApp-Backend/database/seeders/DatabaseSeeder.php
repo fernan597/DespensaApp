@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             CategoriesSeeder::class,
             MarcasSeeder::class,
+            ClienteSeeder::class,
         ]);
     }
 }
