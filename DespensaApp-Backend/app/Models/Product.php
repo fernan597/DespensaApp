@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Category;
+use App\Models\Marca;
+
 
 class Product extends Model
 {
-    
+    use HasFactory;
     protected $table = 'products';
     public $timestamps = false;
     protected $fillable = [

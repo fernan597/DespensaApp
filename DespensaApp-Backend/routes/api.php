@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CajaController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VentaController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,20 +38,32 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('role:admin_despensa')->group(function () {
-        Route::get('/products', [ProductController::class, 'index']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
-        Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
-        Route::get('/marcas', [MarcaController::class, 'index']);
         Route::post('/marcas', [MarcaController::class, 'store']);
         Route::delete('/marcas/{id}', [MarcaController::class, 'destroy']);
+        // Historial de cajas (solo admin del negocio)
+        Route::get('/cajas', [CajaController::class, 'index']);
     });
 
-    Route::middleware('role:admin_despensa,empleado')->group(function () {
-        
+    Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
+        // --- Catálogo (lectura requerida para POS y gestión) ---
+        Route::get('/products',   [ProductController::class, 'index']);
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::get('/marcas',     [MarcaController::class, 'index']);
+
+        // --- Caja ---
+        Route::get('/caja/estado',  [CajaController::class, 'estado']);
+        Route::post('/caja/abrir',  [CajaController::class, 'abrir']);
+        Route::post('/caja/cerrar', [CajaController::class, 'cerrar']);
+
+        // --- Ventas ---
+        Route::post('/ventas/contado', [VentaController::class, 'storeContado']);
+        Route::get('/ventas',          [VentaController::class, 'index']);
+        Route::get('/ventas/{id}',     [VentaController::class, 'show']);
     });
 
 });

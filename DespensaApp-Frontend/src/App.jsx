@@ -7,6 +7,7 @@ import { LoginForm } from "./pages/login";
 import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
 import { AdminProducts } from "./pages/AdminProducts";
+import { PuntoDeVenta } from "./pages/PuntoDeVenta";
 import { MainLayout } from "./components/MainLayout";
 
 function App() {
@@ -33,6 +34,9 @@ function App() {
               <Route element={<AdminDespensaRoute />}>
                 <Route path="/admin/productos" element={<AdminProducts />} />
               </Route>
+
+              {/* Punto de Venta — empleado y admin_despensa */}
+              <Route path="/punto-de-venta" element={<PuntoDeVenta />} />
 
             </Route>
           </Route>

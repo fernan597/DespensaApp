@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
             MarcasSeeder::class,
             ClienteSeeder::class,
         ]);
+        \App\Models\Product::factory(50)->create();
     }
 }

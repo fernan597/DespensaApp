@@ -33,6 +33,7 @@ export function MainLayout() {
 
                     {/* Opción de Productos y Stock (Para el Dueño / Vendedor) */}
                     {user?.role === "admin_despensa" && (
+
                         <NavLink
                             to="/admin/productos"
                             className={({ isActive }) =>
@@ -45,7 +46,25 @@ export function MainLayout() {
                             <span className="material-symbols-outlined mr-md">inventory_2</span>
                             <span className="font-label-md text-label-md">Productos y Stock</span>
                         </NavLink>
+
                     )}
+
+                    {/* Opción Punto de Venta (Visible para Dueño y Empleados) */}
+                    {(user?.role === "admin_despensa" || user?.role === "empleado") && (
+                        <NavLink
+                            to="/punto-de-venta"
+                            className={({ isActive }) =>
+                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
+                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
+                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                                }`
+                            }
+                        >
+                            <span className="material-symbols-outlined mr-md">point_of_sale</span>
+                            <span className="font-label-md text-label-md">Punto de Venta</span>
+                        </NavLink>
+                    )}
+
 
                     {/* Dashboard General */}
                     <NavLink

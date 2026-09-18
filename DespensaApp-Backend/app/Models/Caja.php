@@ -57,13 +57,23 @@ class Caja extends Model
      */
     public function saldoEsperado(): float
     {
-        $ingresos = $this->movimientos()
+        $ingresos = $this->totalIngresos();
+        $egresos = $this->totalEgresos();
+        return (float) ($this->saldo_inicial + $ingresos - $egresos);
+    }
+
+     public function totalIngresos():float
+    {
+        return (float) $this->movimientos()
             ->whereIn('tipo', ['INGRESO_VENTA', 'INGRESO_COBRO_CLIENTE'])
             ->sum('monto');
-        $egresos = $this->movimientos()
+    }
+
+    public function totalEgresos():float
+    {
+        return (float) $this->movimientos()
             ->whereIn('tipo', ['EGRESO_PAGO_PROVEEDOR', 'EGRESO_GASTO_VARIOS'])
             ->sum('monto');
-        return (float) ($this->saldo_inicial + $ingresos - $egresos);
     }
 
 }

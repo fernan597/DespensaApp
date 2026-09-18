@@ -5,6 +5,7 @@ export function Dashboard() {
     const { user, logout } = useAuth();
     const isAdmin = user?.role === "admin";
     const isAdminDespensa = user?.role === "admin_despensa";
+    const isEmpleado = user?.role === "empleado";
 
 
     return (
@@ -93,8 +94,31 @@ export function Dashboard() {
                     </div>
                 )}
 
+                {/* Punto de Venta - empleado y admin_despensa */}
+                {(isAdminDespensa || isEmpleado) && (
+                    <div className="bg-tertiary-container/20 border border-tertiary/20 p-lg rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-md shadow-sm">
+                        <div className="flex items-center gap-md">
+                            <div className="w-12 h-12 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center">
+                                <span className="material-symbols-outlined text-[26px]">point_of_sale</span>
+                            </div>
+                            <div>
+                                <h3 className="font-headline-md text-title-lg text-tertiary font-bold">
+                                    Punto de Venta
+                                </h3>
+                                <p className="text-on-surface-variant text-label-md">
+                                    Registrá ventas de contado, manejá la caja y el cobro.
+                                </p>
+                            </div>
+                        </div>
+                        <Link to="/punto-de-venta" className="inline-flex items-center justify-center gap-xs px-lg py-md bg-tertiary text-on-tertiary rounded-full font-label-md text-label-md hover:bg-tertiary/90 transition-colors shrink-0 shadow-sm">
+                            <span>Ir al Punto de Venta</span>
+                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </Link>
+                    </div>
+                )}
+
                 {/* Placeholder si no tiene ninguna sección especial */}
-                {!isAdmin && !isAdminDespensa && (
+                {!isAdmin && !isAdminDespensa && !isEmpleado && (
                     <div className="bg-surface-container-lowest p-lg rounded-2xl border border-surface-container-high text-on-surface-variant text-center space-y-xs">
                         <span className="material-symbols-outlined text-outline text-[32px]">storefront</span>
                         <p className="font-label-md">Sección de ventas e inventario en desarrollo.</p>
