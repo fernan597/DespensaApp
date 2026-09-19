@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { AdminRoute } from "./components/AdminRoute";
-import { AdminDespensaRoute } from "./components/AdminDespensaRoute";
+import { RoleRoute } from "./components/RoleRoute";
 import { LoginForm } from "./pages/login";
 import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
@@ -26,17 +25,19 @@ function App() {
               <Route path="/" element={<Dashboard />} />
 
               {/* Exclusivo Admin del Sistema */}
-              <Route element={<AdminRoute />}>
+              <Route element={<RoleRoute roles={["admin"]} />}>
                 <Route path="/admin/usuarios" element={<AdminUsers />} />
               </Route>
 
-              {/* Exclusivo Dueño / Gestión de Productos */}
-              <Route element={<AdminDespensaRoute />}>
+              {/* Exclusivo Admin Despensa — Gestión de Productos */}
+              <Route element={<RoleRoute roles={["admin_despensa"]} />}>
                 <Route path="/admin/productos" element={<AdminProducts />} />
               </Route>
 
               {/* Punto de Venta — empleado y admin_despensa */}
-              <Route path="/punto-de-venta" element={<PuntoDeVenta />} />
+              <Route element={<RoleRoute roles={["admin_despensa", "empleado"]} />}>
+                <Route path="/punto-de-venta" element={<PuntoDeVenta />} />
+              </Route>
 
             </Route>
           </Route>
@@ -50,3 +51,4 @@ function App() {
 }
 
 export default App;
+

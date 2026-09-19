@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useRole } from "../hooks/useRole";
 
 export function Dashboard() {
-    const { user, logout } = useAuth();
-    const isAdmin = user?.role === "admin";
-    const isAdminDespensa = user?.role === "admin_despensa";
-    const isEmpleado = user?.role === "empleado";
+    const { user } = useAuth();
+    const { isAdmin, isAdminDespensa, isEmpleado } = useRole();
 
 
     return (
@@ -21,15 +20,7 @@ export function Dashboard() {
                             <p className="text-label-sm text-on-surface-variant">Panel General</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-md">
-                        <button
-                            onClick={logout}
-                            className="px-md py-sm rounded-full bg-surface-container text-error hover:bg-error-container hover:text-on-error-container font-label-md text-label-md transition-colors flex items-center gap-xs"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">logout</span>
-                            Cerrar sesión
-                        </button>
-                    </div>
+
                 </header>
 
                 <div className="bg-surface-container-lowest p-lg rounded-2xl shadow-sm border border-surface-container-high space-y-sm">

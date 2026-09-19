@@ -1,8 +1,33 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Ajusta la ruta a tu AuthContext
+import { useAuth } from "../context/AuthContext";
+import { useRole } from "../hooks/useRole";
+
+/**
+ * Ítem de navegación del sidebar.
+ * Encapsula el markup y las clases activo/inactivo para evitar repetición.
+ */
+function SidebarNavLink({ to, icon, label, end = false }) {
+    return (
+        <NavLink
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${
+                    isActive
+                        ? "bg-secondary-container text-on-secondary-container font-semibold"
+                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                }`
+            }
+        >
+            <span className="material-symbols-outlined mr-md">{icon}</span>
+            <span className="font-label-md text-label-md">{label}</span>
+        </NavLink>
+    );
+}
 
 export function MainLayout() {
     const { user, logout } = useAuth();
+    const { isAdmin, isAdminDespensa, canUsePOS } = useRole();
 
     return (
         <div className="bg-background font-body-md text-on-background min-h-screen">
@@ -11,75 +36,23 @@ export function MainLayout() {
             <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col shadow-[4px_0_12px_rgba(21,66,18,0.04)]">
                 <div className="px-xl py-xl flex items-center gap-sm">
                     <span className="material-symbols-outlined text-primary text-[32px]">potted_plant</span>
-                    <h1 className="font-headline-md text-headline-md text-primary tracking-tight">Verdant</h1>
+                    <h1 className="font-headline-md text-headline-md text-primary tracking-tight">DespensaApp</h1>
                 </div>
 
                 <nav className="flex-1 px-md flex flex-col gap-xs">
-                    {/* Opción de Usuarios (Solo visible para Admin) */}
-                    {(user?.role === "admin") && (
-                        <NavLink
-                            to="/admin/usuarios"
-                            className={({ isActive }) =>
-                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
-                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined mr-md">group</span>
-                            <span className="font-label-md text-label-md">Usuarios</span>
-                        </NavLink>
+                    <SidebarNavLink to="/" icon="dashboard" label="Dashboard" end />
+
+                    {isAdmin && (
+                        <SidebarNavLink to="/admin/usuarios" icon="group" label="Usuarios" />
                     )}
 
-                    {/* Opción de Productos y Stock (Para el Dueño / Vendedor) */}
-                    {user?.role === "admin_despensa" && (
-
-                        <NavLink
-                            to="/admin/productos"
-                            className={({ isActive }) =>
-                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
-                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined mr-md">inventory_2</span>
-                            <span className="font-label-md text-label-md">Productos y Stock</span>
-                        </NavLink>
-
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/productos" icon="inventory_2" label="Productos y Stock" />
                     )}
 
-                    {/* Opción Punto de Venta (Visible para Dueño y Empleados) */}
-                    {(user?.role === "admin_despensa" || user?.role === "empleado") && (
-                        <NavLink
-                            to="/punto-de-venta"
-                            className={({ isActive }) =>
-                                `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
-                                    ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined mr-md">point_of_sale</span>
-                            <span className="font-label-md text-label-md">Punto de Venta</span>
-                        </NavLink>
+                    {canUsePOS && (
+                        <SidebarNavLink to="/punto-de-venta" icon="point_of_sale" label="Punto de Venta" />
                     )}
-
-
-                    {/* Dashboard General */}
-                    <NavLink
-                        to="/"
-                        end
-                        className={({ isActive }) =>
-                            `flex items-center px-md py-md rounded-xl transition-all duration-200 ${isActive
-                                ? "bg-secondary-container text-on-secondary-container font-semibold"
-                                : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-                            }`
-                        }
-                    >
-                        <span className="material-symbols-outlined mr-md">dashboard</span>
-                        <span className="font-label-md text-label-md">Dashboard</span>
-                    </NavLink>
 
                     {/* Botón Cerrar Sesión */}
                     <button
@@ -106,11 +79,6 @@ export function MainLayout() {
                     </div>
 
                     <div className="flex items-center gap-xl">
-                        <button className="relative p-sm text-on-surface-variant hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">notifications</span>
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-                        </button>
-
                         <div className="flex items-center gap-md pl-md">
                             <div className="text-right hidden sm:block">
                                 <p className="font-label-md text-label-md text-on-surface font-semibold">
@@ -136,3 +104,4 @@ export function MainLayout() {
         </div>
     );
 }
+

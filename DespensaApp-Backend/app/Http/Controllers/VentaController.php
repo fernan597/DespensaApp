@@ -137,62 +137,14 @@ class VentaController extends Controller
         }
     }
 
-    /**
-     * GET /api/ventas
-     *
-     * Listado paginado de ventas con filtros opcionales de fecha y cliente.
-     *
-     * Query params opcionales:
-     *   - fecha_desde (Y-m-d)
-     *   - fecha_hasta (Y-m-d)
-     *   - cliente_id
-     */
+   
     public function index(Request $request): JsonResponse
     {
-        $query = Venta::with([
-            'user:id,name',
-            'cliente:id,nombre,apellido',
-        ])->latest();
-
-        if ($request->filled('fecha_desde') && $request->filled('fecha_hasta')) {
-            $query->whereBetween('created_at', [
-                $request->fecha_desde . ' 00:00:00',
-                $request->fecha_hasta . ' 23:59:59',
-            ]);
-        }
-
-        if ($request->filled('cliente_id')) {
-            $query->where('cliente_id', $request->cliente_id);
-        }
-
-        $ventas = $query->paginate(20);
-
-        return response()->json([
-            'ventas' => $ventas,
-        ], 200);
     }
 
-    /**
-     * GET /api/ventas/{id}
-     *
-     * Detalle completo de una venta para reimprimir ticket o consulta.
-     */
+    
     public function show(int $id): JsonResponse
     {
-        $venta = Venta::with([
-            'user:id,name',
-            'cliente:id,nombre,apellido',
-            'detalles.producto:id,nombre,codigo_barra',
-        ])->find($id);
-
-        if (! $venta) {
-            return response()->json([
-                'message' => 'Venta no encontrada.',
-            ], 404);
-        }
-
-        return response()->json([
-            'venta' => $venta,
-        ], 200);
+        
     }
 }

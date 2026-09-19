@@ -23,6 +23,7 @@ export function PuntoDeVenta() {
     const [productos, setProductos] = useState([]);
     const [loadingProductos, setLoadingProductos] = useState(true);
     const [loadingVenta, setLoadingVenta] = useState(false);
+    const [ventaError, setVentaError] = useState(null);
     const [ventaExitosa, setVentaExitosa] = useState(null); // Guarda la última venta registrada
 
     // Cargar catálogo de productos al montar (una sola vez)
@@ -60,12 +61,13 @@ export function PuntoDeVenta() {
 
         try {
             setLoadingVenta(true);
+            setVentaError(null);
             const data = await registrarVentaContado(payload);
             setVentaExitosa(data.venta);
             limpiarCarrito();
             fetchProductos(); // Refresca stock actualizado
         } catch (err) {
-            alert(err.message || "Error al registrar la venta.");
+            setVentaError(err.message || "Error al registrar la venta.");
         } finally {
             setLoadingVenta(false);
         }
@@ -97,6 +99,22 @@ export function PuntoDeVenta() {
 
             {cajaError && (
                 <p className="text-label-sm text-error">{cajaError}</p>
+            )}
+
+            {/* Error de registro de venta */}
+            {ventaError && (
+                <div className="flex items-center justify-between gap-sm p-md bg-error-container/30 border border-error/30 rounded-2xl">
+                    <div className="flex items-center gap-sm">
+                        <span className="material-symbols-outlined text-error text-[20px]">error</span>
+                        <p className="text-body-md text-error">{ventaError}</p>
+                    </div>
+                    <button
+                        onClick={() => setVentaError(null)}
+                        className="text-on-surface-variant hover:text-on-surface shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
             )}
 
             {/* Confirmación de venta exitosa */}
