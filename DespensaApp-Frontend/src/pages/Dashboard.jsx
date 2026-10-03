@@ -64,25 +64,46 @@ export function Dashboard() {
 
                 {/* Gestión de Productos - solo Owner */}
                 {isAdminDespensa && (
-                    <div className="bg-secondary-container/20 border border-secondary/20 p-lg rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-md shadow-sm">
-                        <div className="flex items-center gap-md">
-                            <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[26px]">inventory_2</span>
+                    <>
+                        <div className="bg-secondary-container/20 border border-secondary/20 p-lg rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-md shadow-sm">
+                            <div className="flex items-center gap-md">
+                                <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-[26px]">inventory_2</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-headline-md text-title-lg text-secondary font-bold">
+                                        Gestión de Productos
+                                    </h3>
+                                    <p className="text-on-surface-variant text-label-md">
+                                        Administra el catálogo de productos y el inventario del negocio.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-headline-md text-title-lg text-secondary font-bold">
-                                    Gestión de Productos
-                                </h3>
-                                <p className="text-on-surface-variant text-label-md">
-                                    Administra el catálogo de productos y el inventario del negocio.
-                                </p>
-                            </div>
+                            <Link to="/admin/productos" className="inline-flex items-center justify-center gap-xs px-lg py-md bg-secondary text-on-secondary rounded-full font-label-md text-label-md hover:bg-secondary/90 transition-colors shrink-0 shadow-sm">
+                                <span>Ir al Panel de Productos</span>
+                                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </Link>
                         </div>
-                        <Link to="/admin/productos" className="inline-flex items-center justify-center gap-xs px-lg py-md bg-secondary text-on-secondary rounded-full font-label-md text-label-md hover:bg-secondary/90 transition-colors shrink-0 shadow-sm">
-                            <span>Ir al Panel de Productos</span>
-                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                        </Link>
-                    </div>
+                        <div className="bg-secondary-container/20 border border-secondary/20 p-lg rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-md shadow-sm">
+                            <div className="flex items-center gap-md">
+                                <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-[26px]">inventory_2</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-headline-md text-title-lg text-secondary font-bold">
+                                        Gestión de Proveedores
+                                    </h3>
+                                    <p className="text-on-surface-variant text-label-md">
+                                        Administra el catálogo de proveedores del negocio.
+                                    </p>
+                                </div>
+                            </div>
+                            <Link to="/admin/proveedores" className="inline-flex items-center justify-center gap-xs px-lg py-md bg-secondary text-on-secondary rounded-full font-label-md text-label-md hover:bg-secondary/90 transition-colors shrink-0 shadow-sm">
+                                <span>Ir al Panel de Proveedores</span>
+                                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </Link>
+                        </div>
+                    </>
                 )}
 
                 {/* Punto de Venta - empleado y admin_despensa */}

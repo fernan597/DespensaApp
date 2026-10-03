@@ -31,8 +31,8 @@ export function useProducts() {
     const fetchProducts = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getProducts();
-            const productList = Array.isArray(data) ? data : data?.products || [];
+            const response = await getProducts();
+            const productList = response.data;
             setProducts(productList);
         } catch (error) {
             console.error("Error al cargar productos:", error);

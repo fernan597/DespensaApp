@@ -69,7 +69,7 @@ class VentaController extends Controller
 
                 // 4. Crear la cabecera de la venta
                 $venta = Venta::create([
-                    'user_id'    => request()->user()->id,
+                    'user_id'    => $request->user()->id,
                     'cliente_id' => $request->cliente_id ?? null,
                     'total'      => round($total, 2),
                     'tipo_venta' => 'CONTADO',
@@ -140,11 +140,25 @@ class VentaController extends Controller
    
     public function index(Request $request): JsonResponse
     {
+        $ventas = Venta::orderBy('id', 'desc')->get();
+        return response()->json([
+            'success'=> true,
+            'data'=> VentaResource::collection($ventas)
+        ]);
     }
 
     
-    public function show(int $id): JsonResponse
+    public function show(Venta $venta): JsonResponse
     {
-        
+        $venta->load([
+            'user:id,name',
+            'cliente:id,nombre,apellido',
+            'detalles.producto:id,nombre,codigo_barra',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => new VentaResource($venta),
+        ]);
     }
 }

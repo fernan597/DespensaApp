@@ -7,7 +7,7 @@ export function ProtectedRoute() {
     if (loading) {
         return (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-                <p>Cargando sesión...</p>
+                <p></p>
             </div>
         );
     }

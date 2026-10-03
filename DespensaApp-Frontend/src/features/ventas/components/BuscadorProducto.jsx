@@ -12,7 +12,14 @@ import { useBarcodeScanner } from "../../../hooks/useBarcodeScanner";
  *   disabled?: boolean
  * }} props
  */
-export function BuscadorProducto({ productos = [], onAgregar, disabled = false }) {
+export function BuscadorProducto({
+    productos = [],
+    onAgregar,
+    disabled = false,
+    placeholder = "Buscar producto o escanear código de barras...",
+    disabledPlaceholder = "Abrí la caja para buscar productos",
+    precioCampo = "precio_venta",
+}) {
     const [query, setQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
     const inputRef = useRef(null);
@@ -88,11 +95,7 @@ export function BuscadorProducto({ productos = [], onAgregar, disabled = false }
                     }}
                     onFocus={() => query && setShowDropdown(true)}
                     onKeyDown={handleKeyDown}
-                    placeholder={
-                        disabled
-                            ? "Abrí la caja para buscar productos"
-                            : "Buscar producto o escanear código de barras..."
-                    }
+                    placeholder={disabled ? disabledPlaceholder : placeholder}
                     disabled={disabled}
                     className="flex-1 bg-transparent text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none disabled:cursor-not-allowed"
                     autoComplete="off"
@@ -129,7 +132,7 @@ export function BuscadorProducto({ productos = [], onAgregar, disabled = false }
                                     </p>
                                 </div>
                                 <span className="text-body-md font-bold text-primary shrink-0">
-                                    ${producto.precio_venta?.toFixed(2)}
+                                    ${Number(producto[precioCampo] ?? 0).toFixed(2)}
                                 </span>
                             </button>
                         </li>

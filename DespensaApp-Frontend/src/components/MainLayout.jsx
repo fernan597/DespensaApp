@@ -50,6 +50,14 @@ export function MainLayout() {
                         <SidebarNavLink to="/admin/productos" icon="inventory_2" label="Productos y Stock" />
                     )}
 
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/proveedores" icon="local_shipping" label="Proveedores" />
+                    )}
+
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/compras" icon="shopping_bag" label="Registrar Compra" />
+                    )}
+
                     {canUsePOS && (
                         <SidebarNavLink to="/punto-de-venta" icon="point_of_sale" label="Punto de Venta" />
                     )}

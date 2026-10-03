@@ -7,6 +7,7 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\ProveedorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,9 +25,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Rutas protegidas — requieren token Sanctum válido
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
-    });
+    
     Route::post('/logout', [AuthController::class, 'logout']);
     
 
@@ -47,6 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/marcas/{id}', [MarcaController::class, 'destroy']);
         // Historial de cajas (solo admin del negocio)
         Route::get('/cajas', [CajaController::class, 'index']);
+
+        //Rutas para los proveedores
+        Route::apiResource('proveedores', ProveedorController::class)->parameters([
+            'proveedores' => 'proveedor'
+        ]);
     });
 
     Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
@@ -63,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // --- Ventas ---
         Route::post('/ventas/contado', [VentaController::class, 'storeContado']);
         Route::get('/ventas',          [VentaController::class, 'index']);
-        Route::get('/ventas/{id}',     [VentaController::class, 'show']);
+        Route::get('/ventas/{venta}',     [VentaController::class, 'show']);
     });
 
 });

@@ -69,8 +69,8 @@ export function useUsers() {
             roleFilter === "" ||
             u.role === roleFilter ||
             (roleFilter === "admin_despensa" && (u.role === "admin_despensa")) ||
-            (roleFilter === "empleado" && (u.role === "empleado" || u.role === "cajero")) ||
-            (roleFilter === "admin" && (u.role === "admin" || u.role === "administrador"));
+            (roleFilter === "empleado" && (u.role === "empleado")) ||
+            (roleFilter === "admin" && (u.role === "admin"));
 
         const userStatus = u.status || "active";
         const matchesStatus = statusFilter === "" || userStatus === statusFilter;
