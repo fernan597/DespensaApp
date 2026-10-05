@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\CompraController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('proveedores', ProveedorController::class)->parameters([
             'proveedores' => 'proveedor'
         ]);
+
+        // Rutas para compras de mercadería
+        Route::post('/compras', [CompraController::class, 'store']);
+        Route::get('/compras', [CompraController::class, 'index']);
+        Route::get('/compras/{id}', [CompraController::class, 'show']);
     });
 
     Route::middleware('role:admin,admin_despensa,empleado')->group(function () {

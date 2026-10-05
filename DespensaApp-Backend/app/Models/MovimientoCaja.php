@@ -17,6 +17,7 @@ class MovimientoCaja extends Model
         'venta_id',
         'cobro_cliente_id',
         'pago_proveedor_id',
+        'compra_id',
     ];
 
     protected function casts(): array
@@ -58,5 +59,13 @@ class MovimientoCaja extends Model
     public function pagoProveedor(): BelongsTo
     {
         return $this->belongsTo(PagoProveedor::class, 'pago_proveedor_id');
+    }
+
+    /**
+     * La compra de mercadería que generó este egreso (si aplica).
+     */
+    public function compra(): BelongsTo
+    {
+        return $this->belongsTo(Compra::class, 'compra_id');
     }
 }

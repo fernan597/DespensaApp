@@ -27,6 +27,7 @@ class StoreProveedorRequest extends FormRequest
             'telefono' => 'nullable|string|max:50',
             'direccion' => 'nullable|string|max:255',
             'saldo_adeudado' => 'nullable|numeric|min:0',
+            'activo' => 'sometimes|boolean',
         ];
     }
 
@@ -42,6 +43,7 @@ class StoreProveedorRequest extends FormRequest
             'direccion.max' => 'La dirección no puede superar los 255 caracteres.',
             'saldo_adeudado.numeric' => 'El saldo adeudado debe ser un valor numérico.',
             'saldo_adeudado.min' => 'El saldo adeudado no puede ser negativo.',
+            'activo.boolean' => 'El estado del proveedor no es válido.',
         ];
     }
 }

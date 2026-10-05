@@ -20,6 +20,7 @@ class ProveedorResource extends JsonResource
             'telefono' => $this->telefono,
             'direccion' => $this->direccion,
             'saldo_adeudado' => (float) $this->saldo_adeudado,
+            'activo' => (bool) ($this->activo ?? true),
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
