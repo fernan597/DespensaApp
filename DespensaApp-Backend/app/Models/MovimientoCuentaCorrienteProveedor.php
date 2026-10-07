@@ -18,6 +18,7 @@ class MovimientoCuentaCorrienteProveedor extends Model
         'tipo_movimiento',
         'compra_id',
         'pago_proveedor_id',
+        'created_at',
     ];
 
     protected $casts = [
@@ -38,5 +39,27 @@ class MovimientoCuentaCorrienteProveedor extends Model
     public function compra(): BelongsTo
     {
         return $this->belongsTo(Compra::class, 'compra_id');
+    }
+
+    /**
+     * Pago que generó el crédito (si aplica).
+     */
+    public function pagoProveedor(): BelongsTo
+    {
+        return $this->belongsTo(PagoProveedor::class, 'pago_proveedor_id');
+    }
+
+    /**
+     * Scope para filtrar por rango de fechas (created_at).
+     */
+    public function scopeEntreFechas($query, ?string $desde, ?string $hasta)
+    {
+        if ($desde) {
+            $query->whereDate('created_at', '>=', $desde);
+        }
+        if ($hasta) {
+            $query->whereDate('created_at', '<=', $hasta);
+        }
+        return $query;
     }
 }

@@ -58,6 +58,10 @@ export function MainLayout() {
                         <SidebarNavLink to="/admin/compras" icon="shopping_bag" label="Registrar Compra" />
                     )}
 
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/cuentas-corrientes-proveedores" icon="account_balance_wallet" label="CC Proveedores" />
+                    )}
+
                     {canUsePOS && (
                         <SidebarNavLink to="/punto-de-venta" icon="point_of_sale" label="Punto de Venta" />
                     )}

@@ -256,8 +256,8 @@ export function ProductFormModal({
                         {submitting
                             ? "Guardando..."
                             : editingProduct
-                            ? "Actualizar Producto"
-                            : "Guardar Producto"}
+                                ? "Actualizar Producto"
+                                : "Guardar Producto"}
                     </button>
                 </div>
             </form>

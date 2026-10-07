@@ -1,7 +1,7 @@
 /**
  * Tabla de productos con estado de carga, alertas de stock mínimo y acciones.
  */
-export function ProductTable({ products, loading, onEdit, onDelete }) {
+export function ProductTable({ products = [], loading, onEdit, onDelete }) {
     return (
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
             {loading ? (
@@ -9,7 +9,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }) {
                     <span className="material-symbols-outlined animate-spin">progress_activity</span>
                     Cargando catálogo...
                 </div>
-            ) : products.length === 0 ? (
+            ) : (!products || products.length === 0) ? (
                 <div className="p-8 text-center text-on-surface-variant">
                     No se encontraron productos registrados.
                 </div>
@@ -55,11 +55,10 @@ export function ProductTable({ products, loading, onEdit, onDelete }) {
                                         </td>
                                         <td className="p-4">
                                             <span
-                                                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                                                    isLowStock
+                                                className={`px-2.5 py-1 rounded-full text-xs font-medium ${isLowStock
                                                         ? "bg-error-container text-on-error-container"
                                                         : "bg-secondary-fixed text-on-secondary-fixed"
-                                                }`}
+                                                    }`}
                                             >
                                                 {product.stock_actual} un.
                                             </span>

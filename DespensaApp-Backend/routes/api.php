@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\CompraController;
+use App\Http\Controllers\CuentaCorrienteProveedorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/compras', [CompraController::class, 'store']);
         Route::get('/compras', [CompraController::class, 'index']);
         Route::get('/compras/{id}', [CompraController::class, 'show']);
+
+        // Rutas para Cuentas Corrientes de Proveedores (CU13)
+        Route::get('/cc-proveedores', [CuentaCorrienteProveedorController::class, 'index']);
+        Route::get('/cc-proveedores/{id}', [CuentaCorrienteProveedorController::class, 'show']);
     });
 
     Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
