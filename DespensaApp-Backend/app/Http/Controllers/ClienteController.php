@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ClienteResource;
 use App\Models\Cliente;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,8 +33,8 @@ class ClienteController extends Controller
             ->get();
 
         return response()->json([
-            'success' => true,
-            'clientes' => $clientes,
+            'success'  => true,
+            'clientes' => ClienteResource::collection($clientes),
         ]);
     }
 }

@@ -14,7 +14,7 @@ import { ExtractoMovimientosTable } from "../../cuentas-corrientes-common/compon
  *   clienteId: number|null
  * }} props
  */
-export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId }) {
+export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onOpenCobro }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -118,18 +118,30 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId }) {
                             </div>
                         </div>
 
-                        {/* Saldo adeudado actual */}
-                        <div className="bg-surface-container-lowest px-4 py-2 rounded-xl border border-outline-variant/30 text-right shrink-0">
-                            <p className="text-xs text-on-surface-variant font-medium uppercase">
-                                Saldo Pendiente Actual
-                            </p>
-                            <p
-                                className={`text-xl font-bold ${
-                                    cliente.saldo_cuenta_corriente > 0 ? "text-error" : "text-primary"
-                                }`}
-                            >
-                                {formatCurrency(cliente.saldo_cuenta_corriente)}
-                            </p>
+                        {/* Saldo adeudado actual y Acción de Cobro */}
+                        <div className="flex items-center gap-3 shrink-0">
+                            <div className="bg-surface-container-lowest px-4 py-2 rounded-xl border border-outline-variant/30 text-right">
+                                <p className="text-xs text-on-surface-variant font-medium uppercase">
+                                    Saldo Pendiente Actual
+                                </p>
+                                <p
+                                    className={`text-xl font-bold ${
+                                        cliente.saldo_cuenta_corriente > 0 ? "text-error" : "text-primary"
+                                    }`}
+                                >
+                                    {formatCurrency(cliente.saldo_cuenta_corriente)}
+                                </p>
+                            </div>
+                            {cliente.saldo_cuenta_corriente > 0 && onOpenCobro && (
+                                <button
+                                    type="button"
+                                    onClick={() => onOpenCobro(cliente)}
+                                    className="px-3.5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-semibold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">price_check</span>
+                                    <span>Cobrar</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}

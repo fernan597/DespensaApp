@@ -24,6 +24,13 @@ class Product extends Model
         'marca_id',
     ];
 
+    protected $casts = [
+        'stock_actual'  => 'integer',
+        'stock_minimo'  => 'integer',
+        'precio_compra' => 'float',
+        'precio_venta'  => 'float',
+    ];
+
     public function categoria()
     {
         return $this->belongsTo(Category::class, 'categoria_id');

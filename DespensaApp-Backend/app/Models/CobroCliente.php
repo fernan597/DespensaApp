@@ -49,4 +49,12 @@ class CobroCliente extends Model
     {
         return $this->hasOne(MovimientoCuentaCorrienteCliente::class, 'cobro_cliente_id');
     }
+
+    /**
+     * El movimiento en caja generado por este cobro (si aplica pago en efectivo).
+     */
+    public function movimientoCaja(): HasOne
+    {
+        return $this->hasOne(MovimientoCaja::class, 'cobro_cliente_id');
+    }
 }

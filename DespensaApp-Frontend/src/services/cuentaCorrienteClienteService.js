@@ -46,3 +46,6 @@ export async function getDetalleCuentaCorrienteCliente(clienteId, filters = {}) 
         throw error;
     }
 }
+
+export { registrarCobroCliente } from "./cobroClienteService";
+

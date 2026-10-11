@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { getClientes } from "../../../services/clienteService";
+import { formatCurrency } from "../../../utils/formatters";
 
 /**
  * Modal para seleccionar un cliente registrado en el sistema.
@@ -165,8 +166,8 @@ export function ClienteSelectorModal({
                                             }`}
                                         >
                                             {tieneDeuda
-                                                ? `Deuda: $${saldo.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`
-                                                : "Al día ($0.00)"}
+                                                ? `Deuda: ${formatCurrency(saldo)}`
+                                                : `Al día (${formatCurrency(0)})`}
                                         </span>
                                     </div>
                                 </div>
@@ -179,7 +180,7 @@ export function ClienteSelectorModal({
                 <div className="flex justify-end pt-2 border-t border-outline-variant/20">
                     <button
                         type="button"
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="px-4 py-2 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors"
                     >
                         Cancelar

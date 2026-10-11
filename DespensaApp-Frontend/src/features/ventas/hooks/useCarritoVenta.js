@@ -16,15 +16,18 @@ export function useCarritoVenta() {
      * @param {object} producto - Objeto producto del catálogo (debe tener id y precio_venta)
      */
     const agregarProducto = useCallback((producto) => {
+        const precio = Number(producto.precio_venta) || 0;
+        const prodNormalizado = { ...producto, precio_venta: precio };
+
         setItems((prev) => {
-            const existente = prev.find((i) => i.producto.id === producto.id);
+            const existente = prev.find((i) => i.producto.id === prodNormalizado.id);
             if (existente) {
                 return prev.map((i) =>
-                    i.producto.id === producto.id
+                    i.producto.id === prodNormalizado.id
                         ? {
                               ...i,
                               cantidad: i.cantidad + 1,
-                              subtotal: (i.cantidad + 1) * i.producto.precio_venta,
+                              subtotal: (i.cantidad + 1) * precio,
                           }
                         : i
                 );
@@ -32,9 +35,9 @@ export function useCarritoVenta() {
             return [
                 ...prev,
                 {
-                    producto,
+                    producto: prodNormalizado,
                     cantidad: 1,
-                    subtotal: producto.precio_venta,
+                    subtotal: precio,
                 },
             ];
         });
@@ -62,7 +65,7 @@ export function useCarritoVenta() {
         setItems((prev) =>
             prev.map((i) =>
                 i.producto.id === productoId
-                    ? { ...i, cantidad, subtotal: cantidad * i.producto.precio_venta }
+                    ? { ...i, cantidad, subtotal: cantidad * Number(i.producto.precio_venta) }
                     : i
             )
         );

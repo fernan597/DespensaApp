@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatCurrency } from "../../../utils/formatters";
 
 /**
  * Panel lateral de pago para confirmar la venta.
@@ -11,7 +12,9 @@ import { useState } from "react";
  *   onClearCliente: () => void,
  *   onConfirmar: (payload: { tipo_venta: string, cliente_id: number|null, medio_pago: string }) => Promise<void>,
  *   loading: boolean,
- *   disabled: boolean
+ *   cajaAbierta: boolean,
+ *   itemsLength?: number,
+ *   disabled?: boolean
  * }} props
  */
 export function PanelPago({
@@ -20,14 +23,21 @@ export function PanelPago({
     onOpenClienteModal,
     onClearCliente,
     onConfirmar,
-    loading,
-    disabled,
+    loading = false,
+    cajaAbierta = true,
+    itemsLength = 0,
+    disabled = false,
 }) {
     const [tipoVenta, setTipoVenta] = useState("CONTADO"); // "CONTADO" | "CREDITO"
     const [medioPago, setMedioPago] = useState("EFECTIVO");
 
     const esCredito = tipoVenta === "CREDITO";
-    const puedeConfirmar = !disabled && !loading && totalVenta > 0 && (!esCredito || !!clienteSeleccionado);
+    const isCajaHabilitada = cajaAbierta && !disabled;
+    const puedeConfirmar =
+        isCajaHabilitada &&
+        !loading &&
+        totalVenta > 0 &&
+        (!esCredito || !!clienteSeleccionado);
 
     const handleConfirmar = () => {
         if (!puedeConfirmar) return;
@@ -40,7 +50,7 @@ export function PanelPago({
     };
 
     const mediosPagoContado = [
-        { value: "EFECTIVO",      label: "Efectivo",      icon: "payments" },
+        { value: "EFECTIVO",      label: "Efectivo",       icon: "payments" },
         { value: "TRANSFERENCIA", label: "Transferencia",  icon: "account_balance" },
         { value: "DEBITO",        label: "Débito",         icon: "credit_card" },
         { value: "CREDITO",       label: "Tarjeta Crédito",icon: "credit_score" },
@@ -61,7 +71,7 @@ export function PanelPago({
                         type="button"
                         id="tab-venta-contado"
                         onClick={() => setTipoVenta("CONTADO")}
-                        disabled={disabled}
+                        disabled={!isCajaHabilitada}
                         className={`flex items-center justify-center gap-xs py-2 px-3 rounded-xl text-label-md font-bold transition-all ${
                             !esCredito
                                 ? "bg-primary text-on-primary shadow-sm"
@@ -80,7 +90,7 @@ export function PanelPago({
                                 onOpenClienteModal?.();
                             }
                         }}
-                        disabled={disabled}
+                        disabled={!isCajaHabilitada}
                         className={`flex items-center justify-center gap-xs py-2 px-3 rounded-xl text-label-md font-bold transition-all ${
                             esCredito
                                 ? "bg-secondary text-on-secondary shadow-sm"
@@ -121,9 +131,9 @@ export function PanelPago({
                             </p>
                             {esCredito && (
                                 <p className="text-xs font-semibold text-secondary mt-1">
-                                    Deuda actual: ${saldoCliente.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                                    Deuda actual: {formatCurrency(saldoCliente)}
                                     <span className="text-on-surface-variant font-normal">
-                                        {" "}➔ Nuevo: ${nuevoSaldoEstimado.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                                        {" "}➔ Nuevo: {formatCurrency(nuevoSaldoEstimado)}
                                     </span>
                                 </p>
                             )}
@@ -142,7 +152,7 @@ export function PanelPago({
                             type="button"
                             id="btn-seleccionar-cliente"
                             onClick={onOpenClienteModal}
-                            disabled={disabled}
+                            disabled={!isCajaHabilitada}
                             className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
                                 esCredito
                                     ? "bg-error-container/20 border-error/50 text-error hover:bg-error-container/40"
@@ -176,7 +186,7 @@ export function PanelPago({
                                 type="button"
                                 id={`medio-pago-${value.toLowerCase()}`}
                                 onClick={() => setMedioPago(value)}
-                                disabled={disabled}
+                                disabled={!isCajaHabilitada}
                                 className={`flex items-center gap-xs px-md py-sm rounded-xl border text-label-md font-label-md transition-colors disabled:opacity-50 ${
                                     medioPago === value
                                         ? "bg-primary text-on-primary border-primary"
@@ -207,7 +217,7 @@ export function PanelPago({
                 <div className="flex items-center justify-between">
                     <span className="text-title-md text-on-surface-variant">Total a cobrar</span>
                     <span className={`text-display-sm font-bold ${esCredito ? "text-secondary" : "text-primary"}`}>
-                        ${totalVenta.toFixed(2)}
+                        {formatCurrency(totalVenta)}
                     </span>
                 </div>
 
@@ -238,11 +248,15 @@ export function PanelPago({
                     )}
                 </button>
 
-                {disabled && (
-                    <p className="text-label-sm text-on-surface-variant text-center">
+                {!isCajaHabilitada ? (
+                    <p className="text-label-sm text-error text-center font-medium">
                         Abrí la caja para poder registrar ventas.
                     </p>
-                )}
+                ) : totalVenta <= 0 ? (
+                    <p className="text-label-sm text-on-surface-variant text-center">
+                        Agregá productos al carrito para continuar.
+                    </p>
+                ) : null}
             </div>
         </div>
     );

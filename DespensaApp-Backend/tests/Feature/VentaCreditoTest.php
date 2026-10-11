@@ -242,4 +242,85 @@ class VentaCreditoTest extends TestCase
             ->assertJsonCount(1, 'clientes')
             ->assertJsonPath('clientes.0.nombre', 'Mariana');
     }
+
+    public function test_venta_a_credito_falla_si_hay_productos_duplicados_en_items(): void
+    {
+        $this->abrirCaja();
+
+        $payload = [
+            'cliente_id' => $this->cliente->id,
+            'items'      => [
+                [
+                    'producto_id' => $this->producto->id,
+                    'cantidad'    => 2,
+                ],
+                [
+                    'producto_id' => $this->producto->id,
+                    'cantidad'    => 3,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/ventas/credito', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['items.0.producto_id']);
+    }
+
+    public function test_venta_contado_exitosa_con_servicio(): void
+    {
+        $caja = $this->abrirCaja();
+
+        $payload = [
+            'medio_pago' => 'EFECTIVO',
+            'items'      => [
+                [
+                    'producto_id' => $this->producto->id,
+                    'cantidad'    => 2,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/ventas/contado', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('message', 'Venta registrada correctamente.')
+            ->assertJsonPath('venta.tipo_venta', 'CONTADO')
+            ->assertJsonPath('venta.total', 4400);
+
+        // Descontó stock
+        $this->assertEquals(18, $this->producto->fresh()->stock_actual);
+
+        // Generó movimiento de caja
+        $this->assertDatabaseHas('movimientos_caja', [
+            'caja_id' => $caja->id,
+            'tipo'    => 'INGRESO_VENTA',
+            'monto'   => 4400.00,
+        ]);
+    }
+
+    public function test_error_inesperado_retorna_status_500(): void
+    {
+        $this->abrirCaja();
+
+        // Mockeamos VentaService para simular una falla inesperada de base de datos
+        $mockService = $this->mock(\App\Services\VentaService::class);
+        $mockService->shouldReceive('prepararItems')
+            ->andThrow(new \RuntimeException('Connection lost to database'));
+
+        $payload = [
+            'cliente_id' => $this->cliente->id,
+            'items'      => [
+                [
+                    'producto_id' => $this->producto->id,
+                    'cantidad'    => 1,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/ventas/credito', $payload);
+
+        $response->assertStatus(500)
+            ->assertJsonPath('message', 'Ocurrió un error interno al registrar la venta a crédito.');
+    }
 }

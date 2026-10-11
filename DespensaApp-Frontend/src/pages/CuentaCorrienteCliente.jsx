@@ -1,16 +1,21 @@
 import { useCuentaCorrienteCliente } from "../features/cuentas-corrientes-clientes/hooks/useCuentaCorrienteCliente";
 import { DetalleMovimientosClienteModal } from "../features/cuentas-corrientes-clientes/components/DetalleMovimientosClienteModal";
+import { RegistrarCobroModal } from "../features/cuentas-corrientes-clientes/components/RegistrarCobroModal";
 import { CuentaCorrienteKPIs } from "../features/cuentas-corrientes-common/components/CuentaCorrienteKPIs";
+import { Toast } from "../components/feedback/Toast";
 import { formatCurrency } from "../utils/formatters";
 
 /**
- * Página principal de Cuentas Corrientes de Clientes (CU11).
+ * Página principal de Cuentas Corrientes de Clientes (CU11 y CU12).
  * Accesible para admin_despensa y empleado.
  */
 export function CuentaCorrienteCliente() {
     const {
         clientes,
         kpis,
+        pagination,
+        page,
+        setPage,
         loading,
         search,
         setSearch,
@@ -20,6 +25,13 @@ export function CuentaCorrienteCliente() {
         isHistoryModalOpen,
         handleOpenHistory,
         handleCloseHistory,
+        selectedClienteCobro,
+        isCobroModalOpen,
+        handleOpenCobro,
+        handleCloseCobro,
+        handleCobroExitoso,
+        toastMessage,
+        setToastMessage,
         reload,
     } = useCuentaCorrienteCliente();
 
@@ -97,32 +109,29 @@ export function CuentaCorrienteCliente() {
                     <div className="flex items-center gap-1.5 bg-surface-container p-1 rounded-xl border border-outline-variant/30 w-full md:w-auto self-stretch md:self-auto justify-center">
                         <button
                             onClick={() => setEstadoFiltro("todos")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                estadoFiltro === "todos"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${estadoFiltro === "todos"
                                     ? "bg-surface-container-lowest text-primary shadow-sm"
                                     : "text-on-surface-variant hover:text-on-surface"
-                            }`}
+                                }`}
                         >
                             Todos
                         </button>
                         <button
                             onClick={() => setEstadoFiltro("con_deuda")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                                estadoFiltro === "con_deuda"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${estadoFiltro === "con_deuda"
                                     ? "bg-surface-container-lowest text-error shadow-sm"
                                     : "text-on-surface-variant hover:text-on-surface"
-                            }`}
+                                }`}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-error" />
                             Con Deuda
                         </button>
                         <button
                             onClick={() => setEstadoFiltro("al_dia")}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                                estadoFiltro === "al_dia"
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${estadoFiltro === "al_dia"
                                     ? "bg-surface-container-lowest text-secondary shadow-sm"
                                     : "text-on-surface-variant hover:text-on-surface"
-                            }`}
+                                }`}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
                             Al Día
@@ -198,11 +207,10 @@ export function CuentaCorrienteCliente() {
                                                 {/* Estado */}
                                                 <td className="p-4 text-center">
                                                     <span
-                                                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                                            tieneDeuda
+                                                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${tieneDeuda
                                                                 ? "bg-error-container text-on-error-container"
                                                                 : "bg-secondary-fixed text-on-secondary-fixed"
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {tieneDeuda ? "DEUDOR" : "AL DÍA"}
                                                     </span>
@@ -211,9 +219,8 @@ export function CuentaCorrienteCliente() {
                                                 {/* Saldo adeudado */}
                                                 <td className="p-4 text-right whitespace-nowrap">
                                                     <span
-                                                        className={`font-bold font-mono text-base ${
-                                                            tieneDeuda ? "text-error" : "text-primary"
-                                                        }`}
+                                                        className={`font-bold font-mono text-base ${tieneDeuda ? "text-error" : "text-primary"
+                                                            }`}
                                                     >
                                                         {formatCurrency(c.saldo_cuenta_corriente)}
                                                     </span>
@@ -233,16 +240,30 @@ export function CuentaCorrienteCliente() {
 
                                                 {/* Acciones */}
                                                 <td className="p-4 text-right">
-                                                    <button
-                                                        onClick={() => handleOpenHistory(c.id)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-container hover:bg-primary hover:text-on-primary transition-all text-on-surface border border-outline-variant/30 active:scale-95 shadow-sm"
-                                                        title="Ver historial de movimientos"
-                                                    >
-                                                        <span className="material-symbols-outlined text-[16px]">
-                                                            history
-                                                        </span>
-                                                        <span>Ver Extracto</span>
-                                                    </button>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {tieneDeuda && (
+                                                            <button
+                                                                onClick={() => handleOpenCobro(c)}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-on-primary transition-all active:scale-95 shadow-sm"
+                                                                title="Registrar cobro / entrega"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px]">
+                                                                    price_check
+                                                                </span>
+                                                                <span>Cobrar</span>
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleOpenHistory(c.id)}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-container hover:bg-surface-variant transition-all text-on-surface border border-outline-variant/30 active:scale-95 shadow-sm"
+                                                            title="Ver historial de movimientos"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[16px]">
+                                                                history
+                                                            </span>
+                                                            <span>Ver Extracto</span>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -258,6 +279,24 @@ export function CuentaCorrienteCliente() {
                     isOpen={isHistoryModalOpen}
                     onClose={handleCloseHistory}
                     clienteId={selectedClienteId}
+                    onOpenCobro={(cli) => {
+                        handleCloseHistory();
+                        handleOpenCobro(cli);
+                    }}
+                />
+
+                {/* ── Modal para Registrar Cobro / Entrega (CU12) ── */}
+                <RegistrarCobroModal
+                    isOpen={isCobroModalOpen}
+                    onClose={handleCloseCobro}
+                    cliente={selectedClienteCobro}
+                    onCobroExitoso={handleCobroExitoso}
+                />
+
+                {/* ── Toast de Notificación Flotante ── */}
+                <Toast
+                    message={toastMessage}
+                    onClose={() => setToastMessage(null)}
                 />
             </div>
         </div>

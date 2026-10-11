@@ -8,6 +8,7 @@ import { useCaja } from "../features/caja/hooks/useCaja";
 import { useCarritoVenta } from "../features/ventas/hooks/useCarritoVenta";
 import { getProducts } from "../services/productService";
 import { registrarVentaContado, registrarVentaCredito } from "../services/ventaService";
+import { formatCurrency } from "../utils/formatters";
 
 /**
  * Página del Punto de Venta.
@@ -62,24 +63,27 @@ export function PuntoDeVenta() {
             return;
         }
 
-        const payload = {
-            cliente_id: cliente_id ?? null,
-            medio_pago,
-            items: items.map((i) => ({
-                producto_id: i.producto.id,
-                cantidad: i.cantidad,
-            })),
-        };
-
         try {
             setLoadingVenta(true);
             setVentaError(null);
 
+            const itemsPayload = items.map((i) => ({
+                producto_id: i.producto.id,
+                cantidad: i.cantidad,
+            }));
+
             let data;
             if (tipo_venta === "CREDITO") {
-                data = await registrarVentaCredito(payload);
+                data = await registrarVentaCredito({
+                    cliente_id,
+                    items: itemsPayload,
+                });
             } else {
-                data = await registrarVentaContado(payload);
+                data = await registrarVentaContado({
+                    cliente_id: cliente_id ?? null,
+                    medio_pago,
+                    items: itemsPayload,
+                });
             }
 
             setVentaExitosa(data.venta);
@@ -149,7 +153,7 @@ export function PuntoDeVenta() {
                         </span>
                         <div>
                             <p className="text-body-md font-semibold text-green-700">
-                                Venta #{ventaExitosa.id} registrada correctamente — Total: ${Number(ventaExitosa.total).toFixed(2)}
+                                Venta #{ventaExitosa.id} registrada correctamente — Total: {formatCurrency(ventaExitosa.total)}
                             </p>
                             <p className="text-xs text-green-800">
                                 Modalidad: {ventaExitosa.tipo_venta === "CUENTA_CORRIENTE" ? "Crédito / Fiado (Cuenta Corriente)" : "Contado"}
@@ -209,7 +213,8 @@ export function PuntoDeVenta() {
                         onClearCliente={() => setClienteSeleccionado(null)}
                         onConfirmar={handleConfirmarVenta}
                         loading={loadingVenta}
-                        disabled={!cajaAbierta || items.length === 0}
+                        cajaAbierta={cajaAbierta}
+                        itemsLength={items.length}
                     />
                 </div>
             </div>

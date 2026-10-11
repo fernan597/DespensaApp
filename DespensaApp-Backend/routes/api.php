@@ -10,6 +10,7 @@ use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CuentaCorrienteClienteController;
+use App\Http\Controllers\CobroClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaCorrienteProveedorController;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
     
 
     // Rutas protegidas por rol
@@ -86,9 +88,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/ventas',          [VentaController::class, 'index']);
         Route::get('/ventas/{venta}',  [VentaController::class, 'show']);
 
-        // --- Cuentas Corrientes de Clientes (CU11) ---
+        // --- Cuentas Corrientes y Cobros de Clientes (CU11 y CU12) ---
         Route::get('/cc-clientes',     [CuentaCorrienteClienteController::class, 'index']);
         Route::get('/cc-clientes/{id}', [CuentaCorrienteClienteController::class, 'show']);
+        Route::post('/cobros-clientes', [CobroClienteController::class, 'store']);
     });
 
 });

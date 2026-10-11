@@ -1,4 +1,4 @@
-import { formatCurrency } from "../../../utils/formatters";
+import { formatCurrency, formatDateTime } from "../../../utils/formatters";
 
 /**
  * Tabla cronológica de extracto de movimientos de cuenta corriente.
@@ -68,7 +68,7 @@ export function ExtractoMovimientosTable({
                                         className="hover:bg-surface-container-low transition-colors"
                                     >
                                         <td className="p-3 text-on-surface font-mono text-[11px] whitespace-nowrap">
-                                            {m.fecha || "N/A"}
+                                            {formatDateTime(m.fecha)}
                                         </td>
                                         <td className="p-3 text-on-surface font-medium">
                                             {m.concepto}
