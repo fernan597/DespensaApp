@@ -8,6 +8,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CuentaCorrienteClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaCorrienteProveedorController;
 use Illuminate\Http\Request;
@@ -75,10 +77,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/caja/abrir',  [CajaController::class, 'abrir']);
         Route::post('/caja/cerrar', [CajaController::class, 'cerrar']);
 
+        // --- Clientes ---
+        Route::get('/clientes', [ClienteController::class, 'index']);
+
         // --- Ventas ---
         Route::post('/ventas/contado', [VentaController::class, 'storeContado']);
+        Route::post('/ventas/credito', [VentaController::class, 'storeCredito']);
         Route::get('/ventas',          [VentaController::class, 'index']);
-        Route::get('/ventas/{venta}',     [VentaController::class, 'show']);
+        Route::get('/ventas/{venta}',  [VentaController::class, 'show']);
+
+        // --- Cuentas Corrientes de Clientes (CU11) ---
+        Route::get('/cc-clientes',     [CuentaCorrienteClienteController::class, 'index']);
+        Route::get('/cc-clientes/{id}', [CuentaCorrienteClienteController::class, 'show']);
     });
 
 });

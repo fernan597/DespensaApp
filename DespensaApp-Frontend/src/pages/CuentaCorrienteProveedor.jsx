@@ -1,17 +1,7 @@
 import { useCuentaCorrienteProveedor } from "../features/cuentas-corrientes-proveedores/hooks/useCuentaCorrienteProveedor";
 import { DetalleMovimientosProveedor } from "../features/cuentas-corrientes-proveedores/components/DetalleMovimientosProveedor";
-
-/**
- * Formatea un número como moneda ARS ($ 1.250,00).
- */
-const formatCurrency = (val) => {
-    const num = Number(val) || 0;
-    return new Intl.NumberFormat("es-AR", {
-        style: "currency",
-        currency: "ARS",
-        minimumFractionDigits: 2,
-    }).format(num);
-};
+import { CuentaCorrienteKPIs } from "../features/cuentas-corrientes-common/components/CuentaCorrienteKPIs";
+import { formatCurrency } from "../utils/formatters";
 
 /**
  * Página principal de Cuentas Corrientes de Proveedores (CU13).
@@ -64,83 +54,20 @@ export function CuentaCorrienteProveedor() {
                 </div>
 
                 {/* ── Tarjetas KPI Resumen Global ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Total Deuda Global */}
-                    <div className={`rounded-2xl border shadow-sm p-5 flex items-center gap-4 bg-surface-container-lowest ${
-                        kpis.total_deuda_global > 0 ? "border-error/30" : "border-outline-variant/30"
-                    }`}>
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                            kpis.total_deuda_global > 0 ? "bg-error-container" : "bg-secondary-container"
-                        }`}>
-                            <span className={`material-symbols-outlined text-[24px] ${
-                                kpis.total_deuda_global > 0 ? "text-on-error-container" : "text-on-secondary-container"
-                            }`}>
-                                payments
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wide">
-                                Deuda Total Acumulada
-                            </p>
-                            <p className={`text-xl font-bold ${
-                                kpis.total_deuda_global > 0 ? "text-error" : "text-primary"
-                            }`}>
-                                {loading ? "—" : formatCurrency(kpis.total_deuda_global)}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Proveedores con Deuda */}
-                    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-5 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-error-container/60 flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-error text-[24px]">
-                                warning
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wide">
-                                Con Saldo Deudor
-                            </p>
-                            <p className="text-xl font-bold text-on-surface">
-                                {loading ? "—" : kpis.cantidad_proveedores_con_deuda}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Proveedores al Día */}
-                    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-5 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-secondary-container flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-primary text-[24px]">
-                                check_circle
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wide">
-                                Cuentas al Día
-                            </p>
-                            <p className="text-xl font-bold text-primary">
-                                {loading ? "—" : kpis.cantidad_proveedores_al_dia}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Total de Proveedores */}
-                    <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-5 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-surface-container-high flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-on-surface-variant text-[24px]">
-                                local_shipping
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wide">
-                                Proveedores Totales
-                            </p>
-                            <p className="text-xl font-bold text-on-surface">
-                                {loading ? "—" : kpis.total_proveedores}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <CuentaCorrienteKPIs
+                    kpis={{
+                        total_deuda_global: kpis.total_deuda_global,
+                        cantidad_con_deuda: kpis.cantidad_proveedores_con_deuda,
+                        cantidad_al_dia: kpis.cantidad_proveedores_al_dia,
+                        total: kpis.total_proveedores,
+                    }}
+                    loading={loading}
+                    deudaLabel="Deuda Total Acumulada"
+                    conDeudaLabel="Con Saldo Deudor"
+                    alDiaLabel="Cuentas al Día"
+                    totalLabel="Proveedores Totales"
+                    totalIcon="local_shipping"
+                />
 
                 {/* ── Barra de Búsqueda y Filtros de Estado ── */}
                 <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 flex flex-col md:flex-row items-center justify-between gap-4">

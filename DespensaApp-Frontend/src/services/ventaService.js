@@ -15,6 +15,21 @@ export async function registrarVentaContado(payload) {
     return data;
 }
 
+/**
+ * Registra una venta a crédito (fiado).
+ * Requiere obligatoriamente un cliente_id.
+ *
+ * @param {{ cliente_id: number, items: Array<{producto_id: number, cantidad: number}> }} payload
+ * @returns {Promise<{ message: string, venta: object }>}
+ */
+export async function registrarVentaCredito(payload) {
+    const data = await apiFetch("/ventas/credito", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+    return data;
+}
+
 
 export async function getVentas(filtros = {}) {
     //traer todas las ventas y aplicarle los filtros si se envian

@@ -66,6 +66,10 @@ export function MainLayout() {
                         <SidebarNavLink to="/punto-de-venta" icon="point_of_sale" label="Punto de Venta" />
                     )}
 
+                    {canUsePOS && (
+                        <SidebarNavLink to="/cuentas-corrientes-clientes" icon="contact_page" label="CC Clientes" />
+                    )}
+
                     {/* Botón Cerrar Sesión */}
                     <button
                         onClick={logout}

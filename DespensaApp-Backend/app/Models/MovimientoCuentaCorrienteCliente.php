@@ -15,6 +15,7 @@ class MovimientoCuentaCorrienteCliente extends Model
         'tipo_movimiento',
         'venta_id',
         'cobro_cliente_id',
+        'created_at',
     ];
 
     protected function casts(): array

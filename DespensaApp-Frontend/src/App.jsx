@@ -10,6 +10,7 @@ import { AdminProveedores } from "./pages/AdminProveedores";
 import { PuntoDeVenta } from "./pages/PuntoDeVenta";
 import { RegistrarCompra } from "./pages/RegistrarCompra";
 import { CuentaCorrienteProveedor } from "./pages/CuentaCorrienteProveedor";
+import { CuentaCorrienteCliente } from "./pages/CuentaCorrienteCliente";
 import { MainLayout } from "./components/MainLayout";
 
 function App() {
@@ -40,9 +41,10 @@ function App() {
                 <Route path="/admin/cuentas-corrientes-proveedores" element={<CuentaCorrienteProveedor />} />
               </Route>
 
-              {/* Punto de Venta — empleado y admin_despensa */}
+              {/* Punto de Venta y Cuentas Corrientes Clientes — empleado y admin_despensa */}
               <Route element={<RoleRoute roles={["admin_despensa", "empleado"]} />}>
                 <Route path="/punto-de-venta" element={<PuntoDeVenta />} />
+                <Route path="/cuentas-corrientes-clientes" element={<CuentaCorrienteCliente />} />
               </Route>
 
             </Route>

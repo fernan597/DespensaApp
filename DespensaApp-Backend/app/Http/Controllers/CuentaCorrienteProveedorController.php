@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\MovimientoCuentaCorrienteProveedor;
 use App\Models\Proveedor;
+use App\Services\CuentaCorrienteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CuentaCorrienteProveedorController extends Controller
 {
+    public function __construct(
+        protected CuentaCorrienteService $cuentaCorrienteService
+    ) {}
+
     /**
      * Listado consolidado de cuentas corrientes de proveedores con KPIs globales y filtros.
      */
@@ -41,11 +46,9 @@ class CuentaCorrienteProveedorController extends Controller
             ->orderBy('razon_social')
             ->get();
 
-        // KPIs Globales calculados sobre todos los proveedores
+        // KPIs Globales calculados mediante el servicio centralizado
         $todosProveedores = Proveedor::all();
-        $totalDeudaGlobal = (float) $todosProveedores->sum('saldo_adeudado');
-        $conDeudaCount = $todosProveedores->where('saldo_adeudado', '>', 0)->count();
-        $alDiaCount = $todosProveedores->where('saldo_adeudado', '<=', 0)->count();
+        $kpis = $this->cuentaCorrienteService->calcularKpis($todosProveedores, 'saldo_adeudado');
 
         $formatedProveedores = $proveedores->map(function (Proveedor $p) {
             $saldo = (float) $p->saldo_adeudado;
@@ -66,10 +69,10 @@ class CuentaCorrienteProveedorController extends Controller
             'success' => true,
             'data'    => [
                 'kpis' => [
-                    'total_deuda_global'             => $totalDeudaGlobal,
-                    'cantidad_proveedores_con_deuda' => $conDeudaCount,
-                    'cantidad_proveedores_al_dia'    => $alDiaCount,
-                    'total_proveedores'              => $todosProveedores->count(),
+                    'total_deuda_global'             => $kpis['total_deuda_global'],
+                    'cantidad_proveedores_con_deuda' => $kpis['cantidad_con_deuda'],
+                    'cantidad_proveedores_al_dia'    => $kpis['cantidad_al_dia'],
+                    'total_proveedores'              => $kpis['total'],
                 ],
                 'proveedores' => $formatedProveedores,
             ],
@@ -93,21 +96,13 @@ class CuentaCorrienteProveedorController extends Controller
         $fechaDesde = $request->query('fecha_desde');
         $fechaHasta = $request->query('fecha_hasta');
 
-        // 1. Calcular el saldo anterior a la fecha inicial si se envía fecha_desde
-        $saldoAnterior = 0.00;
-        if ($fechaDesde) {
-            $debitosPrevios = (float) MovimientoCuentaCorrienteProveedor::where('proveedor_id', $proveedor->id)
-                ->where('tipo_movimiento', 'DEBITO')
-                ->whereDate('created_at', '<', $fechaDesde)
-                ->sum('monto');
-
-            $creditosPrevios = (float) MovimientoCuentaCorrienteProveedor::where('proveedor_id', $proveedor->id)
-                ->where('tipo_movimiento', 'CREDITO')
-                ->whereDate('created_at', '<', $fechaDesde)
-                ->sum('monto');
-
-            $saldoAnterior = $debitosPrevios - $creditosPrevios;
-        }
+        // 1. Calcular el saldo anterior a la fecha inicial mediante el servicio
+        $saldoAnterior = $this->cuentaCorrienteService->calcularSaldoAnterior(
+            MovimientoCuentaCorrienteProveedor::class,
+            'proveedor_id',
+            $proveedor->id,
+            $fechaDesde
+        );
 
         // 2. Obtener movimientos en el rango de fechas solicitado
         $movimientosQuery = MovimientoCuentaCorrienteProveedor::where('proveedor_id', $proveedor->id)
@@ -118,50 +113,46 @@ class CuentaCorrienteProveedorController extends Controller
             ->orderBy('created_at', 'asc')
             ->orderBy('id', 'asc');
 
-        if ($fechaDesde) {
-            $movimientosQuery->whereDate('created_at', '>=', $fechaDesde);
-        }
-        if ($fechaHasta) {
-            $movimientosQuery->whereDate('created_at', '<=', $fechaHasta);
-        }
+        $this->cuentaCorrienteService->aplicarFiltroFechas($movimientosQuery, $fechaDesde, $fechaHasta);
 
         $movimientos = $movimientosQuery->get();
 
         // 3. Proyectar saldo acumulado secuencialmente
-        $saldoAcumulado = $saldoAnterior;
-        $movimientosFormateados = $movimientos->map(function (MovimientoCuentaCorrienteProveedor $m) use (&$saldoAcumulado) {
-            $monto = (float) $m->monto;
+        $movimientosFormateados = $this->cuentaCorrienteService->proyectarMovimientos(
+            $movimientos,
+            $saldoAnterior,
+            function (MovimientoCuentaCorrienteProveedor $m, float $saldoAcumulado) {
+                $monto = (float) $m->monto;
 
-            if ($m->tipo_movimiento === 'DEBITO') {
-                $saldoAcumulado += $monto;
-                $concepto = $m->compra
-                    ? "Compra de mercadería #{$m->compra->id}" . ($m->compra->numero_comprobante ? " (Comp: {$m->compra->numero_comprobante})" : "")
-                    : "Compra a crédito #{$m->compra_id}";
-            } else {
-                $saldoAcumulado -= $monto;
-                $medio = $m->pagoProveedor?->medio_pago ?? 'EFECTIVO';
-                $concepto = "Pago a proveedor ({$medio})";
+                if ($m->tipo_movimiento === 'DEBITO') {
+                    $concepto = $m->compra
+                        ? "Compra de mercadería #{$m->compra->id}" . ($m->compra->numero_comprobante ? " (Comp: {$m->compra->numero_comprobante})" : "")
+                        : "Compra a crédito #{$m->compra_id}";
+                } else {
+                    $medio = $m->pagoProveedor?->medio_pago ?? 'EFECTIVO';
+                    $concepto = "Pago a proveedor ({$medio})";
+                }
+
+                return [
+                    'id'              => $m->id,
+                    'fecha'           => $m->created_at?->toDateTimeString(),
+                    'tipo_movimiento' => $m->tipo_movimiento,
+                    'monto'           => $monto,
+                    'saldo_acumulado' => $saldoAcumulado,
+                    'concepto'        => $concepto,
+                    'compra'          => $m->compra ? [
+                        'id'                 => $m->compra->id,
+                        'numero_comprobante' => $m->compra->numero_comprobante,
+                        'total'              => (float) $m->compra->total,
+                    ] : null,
+                    'pago_proveedor'  => $m->pagoProveedor ? [
+                        'id'         => $m->pagoProveedor->id,
+                        'monto'      => (float) $m->pagoProveedor->monto,
+                        'medio_pago' => $m->pagoProveedor->medio_pago,
+                    ] : null,
+                ];
             }
-
-            return [
-                'id'              => $m->id,
-                'fecha'           => $m->created_at?->toDateTimeString(),
-                'tipo_movimiento' => $m->tipo_movimiento,
-                'monto'           => $monto,
-                'saldo_acumulado' => round($saldoAcumulado, 2),
-                'concepto'        => $concepto,
-                'compra'          => $m->compra ? [
-                    'id'                 => $m->compra->id,
-                    'numero_comprobante' => $m->compra->numero_comprobante,
-                    'total'              => (float) $m->compra->total,
-                ] : null,
-                'pago_proveedor'  => $m->pagoProveedor ? [
-                    'id'         => $m->pagoProveedor->id,
-                    'monto'      => (float) $m->pagoProveedor->monto,
-                    'medio_pago' => $m->pagoProveedor->medio_pago,
-                ] : null,
-            ];
-        });
+        );
 
         $saldoActual = (float) $proveedor->saldo_adeudado;
 
