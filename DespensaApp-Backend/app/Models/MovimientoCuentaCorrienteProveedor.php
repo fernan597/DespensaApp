@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TipoMovimientoCuentaCorriente;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +23,8 @@ class MovimientoCuentaCorrienteProveedor extends Model
     ];
 
     protected $casts = [
-        'monto' => 'decimal:2',
+        'monto'           => 'decimal:2',
+        'tipo_movimiento' => TipoMovimientoCuentaCorriente::class,
     ];
 
     /**

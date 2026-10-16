@@ -11,8 +11,9 @@ import { ExtractoMovimientosTable } from "../../cuentas-corrientes-common/compon
  * @param {boolean} isOpen
  * @param {Function} onClose
  * @param {number|null} proveedorId - ID del proveedor seleccionado
+ * @param {Function} [onOpenPago] - Callback opcional para abrir el modal de pago
  */
-export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId }) {
+export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOpenPago }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -63,6 +64,7 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId }) {
     };
 
     const proveedor = data?.proveedor;
+    const saldoAdeudado = Number(proveedor?.saldo_adeudado) || 0;
     const movimientos = data?.movimientos || [];
     const periodo = data?.periodo;
     const tieneFiltrosActivos = Boolean(fechaDesde || fechaHasta);
@@ -92,12 +94,12 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId }) {
                                 </h3>
                                 <span
                                     className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
-                                        proveedor.saldo_adeudado > 0
+                                        saldoAdeudado > 0
                                             ? "bg-error-container text-on-error-container"
                                             : "bg-secondary-container text-on-secondary-container"
                                     }`}
                                 >
-                                    {proveedor.saldo_adeudado > 0 ? "Saldo Deudor" : "Al Día"}
+                                    {saldoAdeudado > 0 ? "Saldo Deudor" : "Al Día"}
                                 </span>
                             </div>
                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant mt-1">
@@ -116,18 +118,33 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId }) {
                             </div>
                         </div>
 
-                        {/* Saldo adeudado actual */}
-                        <div className="bg-surface-container-lowest px-4 py-2 rounded-xl border border-outline-variant/30 text-right shrink-0">
-                            <p className="text-xs text-on-surface-variant font-medium uppercase">
-                                Saldo Pendiente Actual
-                            </p>
-                            <p
-                                className={`text-xl font-bold ${
-                                    proveedor.saldo_adeudado > 0 ? "text-error" : "text-primary"
-                                }`}
-                            >
-                                {formatCurrency(proveedor.saldo_adeudado)}
-                            </p>
+                        {/* Saldo adeudado actual y Acción de Pago */}
+                        <div className="flex items-center gap-3 shrink-0">
+                            <div className="bg-surface-container-lowest px-4 py-2 rounded-xl border border-outline-variant/30 text-right">
+                                <p className="text-xs text-on-surface-variant font-medium uppercase">
+                                    Saldo Pendiente Actual
+                                </p>
+                                <p
+                                    className={`text-xl font-bold ${
+                                        saldoAdeudado > 0 ? "text-error" : "text-primary"
+                                    }`}
+                                >
+                                    {formatCurrency(proveedor.saldo_adeudado)}
+                                </p>
+                            </div>
+                            {saldoAdeudado > 0 && onOpenPago && (
+                                <button
+                                    type="button"
+                                    onClick={() => onOpenPago(proveedor)}
+                                    className="px-3.5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-semibold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                                    title="Registrar pago a este proveedor"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">
+                                        payments
+                                    </span>
+                                    Registrar Pago
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}

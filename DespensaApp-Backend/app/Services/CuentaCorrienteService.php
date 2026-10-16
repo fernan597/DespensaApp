@@ -96,8 +96,11 @@ class CuentaCorrienteService
 
         foreach ($movimientos as $mov) {
             $monto = (float) $mov->monto;
+            $tipoMovimiento = $mov->tipo_movimiento instanceof \BackedEnum
+                ? $mov->tipo_movimiento->value
+                : (string) $mov->tipo_movimiento;
 
-            if ($mov->tipo_movimiento === 'DEBITO') {
+            if ($tipoMovimiento === 'DEBITO') {
                 $saldoAcumulado += $monto;
             } else {
                 $saldoAcumulado -= $monto;

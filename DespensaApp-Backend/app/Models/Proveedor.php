@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Proveedor extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'proveedores';
     
@@ -39,5 +40,10 @@ class Proveedor extends Model
     public function movimientosCuentaCorriente()
     {
         return $this->hasMany(MovimientoCuentaCorrienteProveedor::class, 'proveedor_id');
+    }
+
+    public function pagos()
+    {
+        return $this->hasMany(PagoProveedor::class, 'proveedor_id');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TipoMovimientoCaja;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +25,7 @@ class MovimientoCaja extends Model
     {
         return [
             'monto' => 'decimal:2',
+            'tipo'  => TipoMovimientoCaja::class,
         ];
     }
 

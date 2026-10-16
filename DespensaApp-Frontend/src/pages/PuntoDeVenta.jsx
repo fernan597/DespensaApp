@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { CajaEstadoBanner } from "../features/caja/components/CajaEstadoBanner";
-import { BuscadorProducto } from "../features/ventas/components/BuscadorProducto";
+import { BuscadorProducto } from "../features/products/components/BuscadorProducto";
 import { CarritoVenta } from "../features/ventas/components/CarritoVenta";
 import { PanelPago } from "../features/ventas/components/PanelPago";
 import { ClienteSelectorModal } from "../features/ventas/components/ClienteSelectorModal";

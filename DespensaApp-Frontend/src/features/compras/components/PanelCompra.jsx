@@ -1,4 +1,5 @@
 import { InputField } from "../../../components/ui/InputField";
+import { formatCurrency } from "../../../utils/formatters";
 
 const TIPOS_PAGO = [
     { value: "CONTADO", label: "Contado", icon: "payments" },
@@ -126,7 +127,7 @@ export function PanelCompra({
             <div className="flex items-center justify-between pt-sm border-t border-surface-container-high">
                 <span className="text-title-sm font-bold text-on-surface">Total</span>
                 <span className="text-headline-sm font-bold text-primary">
-                    ${Number(totalCompra).toFixed(2)}
+                    {formatCurrency(totalCompra)}
                 </span>
             </div>
 

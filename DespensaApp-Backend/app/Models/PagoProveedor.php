@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MedioPago;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,8 @@ class PagoProveedor extends Model
     ];
 
     protected $casts = [
-        'monto' => 'decimal:2',
+        'monto'      => 'decimal:2',
+        'medio_pago' => MedioPago::class,
     ];
 
     /**

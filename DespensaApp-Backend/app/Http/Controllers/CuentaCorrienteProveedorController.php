@@ -124,19 +124,25 @@ class CuentaCorrienteProveedorController extends Controller
             function (MovimientoCuentaCorrienteProveedor $m, float $saldoAcumulado) {
                 $monto = (float) $m->monto;
 
-                if ($m->tipo_movimiento === 'DEBITO') {
+                $tipoMov = $m->tipo_movimiento instanceof \BackedEnum
+                    ? $m->tipo_movimiento->value
+                    : (string) $m->tipo_movimiento;
+
+                if ($tipoMov === 'DEBITO') {
                     $concepto = $m->compra
                         ? "Compra de mercadería #{$m->compra->id}" . ($m->compra->numero_comprobante ? " (Comp: {$m->compra->numero_comprobante})" : "")
                         : "Compra a crédito #{$m->compra_id}";
                 } else {
-                    $medio = $m->pagoProveedor?->medio_pago ?? 'EFECTIVO';
+                    $medio = $m->pagoProveedor?->medio_pago instanceof \BackedEnum
+                        ? $m->pagoProveedor->medio_pago->value
+                        : ($m->pagoProveedor?->medio_pago ?? 'EFECTIVO');
                     $concepto = "Pago a proveedor ({$medio})";
                 }
 
                 return [
                     'id'              => $m->id,
                     'fecha'           => $m->created_at?->toDateTimeString(),
-                    'tipo_movimiento' => $m->tipo_movimiento,
+                    'tipo_movimiento' => $tipoMov,
                     'monto'           => $monto,
                     'saldo_acumulado' => $saldoAcumulado,
                     'concepto'        => $concepto,
@@ -148,7 +154,9 @@ class CuentaCorrienteProveedorController extends Controller
                     'pago_proveedor'  => $m->pagoProveedor ? [
                         'id'         => $m->pagoProveedor->id,
                         'monto'      => (float) $m->pagoProveedor->monto,
-                        'medio_pago' => $m->pagoProveedor->medio_pago,
+                        'medio_pago' => $m->pagoProveedor->medio_pago instanceof \BackedEnum
+                            ? $m->pagoProveedor->medio_pago->value
+                            : $m->pagoProveedor->medio_pago,
                     ] : null,
                 ];
             }

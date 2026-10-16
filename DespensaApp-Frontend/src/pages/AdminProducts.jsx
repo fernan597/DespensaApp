@@ -3,6 +3,7 @@ import { useProducts } from "../features/products/hooks/useProducts";
 import { ProductTable } from "../features/products/components/ProductTable";
 import { ProductFormModal } from "../features/products/components/ProductFormModal";
 import { QuickCategoryModal } from "../features/products/components/QuickCategoryModal";
+import { SearchBar } from "../components/ui/SearchBar";
 import { useBarcodeScanner } from "../hooks/useBarcodeScanner";
 
 export function AdminProducts() {
@@ -84,17 +85,14 @@ export function AdminProducts() {
                 </div>
 
                 {/* Barra de Búsqueda (Texto / Lector) */}
-                <div className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-3">
-                    <span className="material-symbols-outlined text-on-surface-variant">search</span>
-                    <input
-                        ref={searchInputRef}
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Buscar por nombre, código de barra, categoría o marca..."
-                        className="w-full bg-transparent font-body-md text-on-surface placeholder:text-outline focus:outline-none"
-                        autoFocus
-                    />
+                <SearchBar
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClear={() => setSearch("")}
+                    placeholder="Buscar por nombre, código de barra, categoría o marca..."
+                    inputRef={searchInputRef}
+                    autoFocus
+                >
                     <span
                         className="hidden sm:flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full border border-outline-variant/40 shrink-0 select-none"
                         title="Pistola lectora activa en cualquier momento"
@@ -102,12 +100,7 @@ export function AdminProducts() {
                         <span className="material-symbols-outlined text-[16px] text-primary">barcode_scanner</span>
                         <span>Pistola activa</span>
                     </span>
-                    {search && (
-                        <button onClick={() => setSearch("")} className="text-on-surface-variant hover:text-on-surface">
-                            <span className="material-symbols-outlined text-[18px]">close</span>
-                        </button>
-                    )}
-                </div>
+                </SearchBar>
 
                 {/* Tabla de Productos */}
                 <ProductTable

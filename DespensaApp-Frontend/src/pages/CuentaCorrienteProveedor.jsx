@@ -1,13 +1,19 @@
+import { useState } from "react";
 import { useCuentaCorrienteProveedor } from "../features/cuentas-corrientes-proveedores/hooks/useCuentaCorrienteProveedor";
 import { DetalleMovimientosProveedor } from "../features/cuentas-corrientes-proveedores/components/DetalleMovimientosProveedor";
+import { RegistrarPagoProveedorModal } from "../features/cuentas-corrientes-proveedores/components/RegistrarPagoProveedorModal";
+import { SearchBar } from "../components/ui/SearchBar";
 import { CuentaCorrienteKPIs } from "../features/cuentas-corrientes-common/components/CuentaCorrienteKPIs";
 import { formatCurrency } from "../utils/formatters";
 
 /**
- * Página principal de Cuentas Corrientes de Proveedores (CU13).
+ * Página principal de Cuentas Corrientes de Proveedores.
  * Accesible exclusivamente para el rol admin_despensa.
  */
 export function CuentaCorrienteProveedor() {
+    const [proveedorParaPago, setProveedorParaPago] = useState(null);
+    const [isPagoModalOpen, setIsPagoModalOpen] = useState(false);
+
     const {
         proveedores,
         kpis,
@@ -22,6 +28,20 @@ export function CuentaCorrienteProveedor() {
         handleCloseHistory,
         reload,
     } = useCuentaCorrienteProveedor();
+
+    const handleOpenPago = (proveedor) => {
+        setProveedorParaPago(proveedor);
+        setIsPagoModalOpen(true);
+    };
+
+    const handleClosePago = () => {
+        setIsPagoModalOpen(false);
+        setProveedorParaPago(null);
+    };
+
+    const handlePagoExitoso = () => {
+        reload();
+    };
 
     return (
         <div className="bg-surface text-on-surface min-h-screen p-6 font-body-md">
@@ -72,26 +92,13 @@ export function CuentaCorrienteProveedor() {
                 {/* ── Barra de Búsqueda y Filtros de Estado ── */}
                 <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm p-4 flex flex-col md:flex-row items-center justify-between gap-4">
                     {/* Input de Búsqueda */}
-                    <div className="relative w-full md:w-96">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">
-                            search
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Buscar proveedor por razón social o teléfono..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant/50 rounded-xl text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary text-sm transition-all"
-                        />
-                        {search && (
-                            <button
-                                onClick={() => setSearch("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
-                            >
-                                <span className="material-symbols-outlined text-[16px]">close</span>
-                            </button>
-                        )}
-                    </div>
+                    <SearchBar
+                        variant="input"
+                        placeholder="Buscar proveedor por razón social o teléfono..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        onClear={() => setSearch("")}
+                    />
 
                     {/* Filtros de Estado (Pestañas) */}
                     <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl w-full md:w-auto overflow-x-auto">
@@ -175,7 +182,7 @@ export function CuentaCorrienteProveedor() {
                                     </tr>
                                 ) : (
                                     proveedores.map((p) => {
-                                        const tieneDeuda = p.saldo_adeudado > 0;
+                                        const tieneDeuda = Number(p.saldo_adeudado) > 0;
                                         return (
                                             <tr
                                                 key={p.id}
@@ -248,19 +255,34 @@ export function CuentaCorrienteProveedor() {
                                                     </span>
                                                 </td>
 
-                                                {/* Botón Acción */}
+                                                {/* Botones Acción */}
                                                 <td className="px-5 py-4 text-right">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleOpenHistory(p.id)}
-                                                        className="inline-flex items-center gap-1.5 bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
-                                                        title="Ver historial de movimientos"
-                                                    >
-                                                        <span className="material-symbols-outlined text-[16px]">
-                                                            receipt_long
-                                                        </span>
-                                                        Historial
-                                                    </button>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {tieneDeuda && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleOpenPago(p)}
+                                                                className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
+                                                                title="Registrar pago a este proveedor"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px]">
+                                                                    payments
+                                                                </span>
+                                                                Pagar
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleOpenHistory(p.id)}
+                                                            className="inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-variant text-on-surface px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 border border-outline-variant/30"
+                                                            title="Ver historial de movimientos"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[16px]">
+                                                                receipt_long
+                                                            </span>
+                                                            Historial
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -278,6 +300,15 @@ export function CuentaCorrienteProveedor() {
                 isOpen={isHistoryModalOpen}
                 onClose={handleCloseHistory}
                 proveedorId={selectedProveedorId}
+                onOpenPago={handleOpenPago}
+            />
+
+            {/* ── Modal para Registrar Pago a Proveedor (CU14) ── */}
+            <RegistrarPagoProveedorModal
+                isOpen={isPagoModalOpen}
+                onClose={handleClosePago}
+                proveedor={proveedorParaPago}
+                onPagoExitoso={handlePagoExitoso}
             />
         </div>
     );

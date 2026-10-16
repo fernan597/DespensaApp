@@ -3,7 +3,7 @@ import { useProducts } from "../features/products/hooks/useProducts";
 import { useProveedores } from "../features/proveedores/hooks/useProveedores";
 import { useCaja } from "../features/caja/hooks/useCaja";
 import { useCarritoCompra } from "../features/compras/hooks/useCarritoCompra";
-import { BuscadorProducto } from "../features/ventas/components/BuscadorProducto";
+import { BuscadorProducto } from "../features/products/components/BuscadorProducto";
 import { DetalleCompra } from "../features/compras/components/DetalleCompra";
 import { PanelCompra } from "../features/compras/components/PanelCompra";
 import { registrarCompra } from "../services/compraService";

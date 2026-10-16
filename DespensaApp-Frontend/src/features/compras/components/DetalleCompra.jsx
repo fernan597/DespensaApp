@@ -1,4 +1,5 @@
 import { InputField } from "../../../components/ui/InputField";
+import { formatCurrency } from "../../../utils/formatters";
 
 /**
  * Tabla editable con los ítems de la compra en curso.
@@ -82,7 +83,7 @@ export function DetalleCompra({
                         />
 
                         <span className="text-right text-body-md font-semibold text-on-surface pt-2">
-                            ${subtotal.toFixed(2)}
+                            {formatCurrency(subtotal)}
                         </span>
 
                         <button

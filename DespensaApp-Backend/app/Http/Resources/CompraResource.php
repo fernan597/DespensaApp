@@ -19,7 +19,7 @@ class CompraResource extends JsonResource
             'user_id'                     => $this->user_id,
             'proveedor_id'                => $this->proveedor_id,
             'numero_comprobante'          => $this->numero_comprobante,
-            'total'                       => (float) $this->total,
+            'total'                       => $this->total,
             'tipo_pago'                   => $this->tipo_pago,
             'pendiente_pago'              => (bool) $this->pendiente_pago,
             'estado'                      => $this->estado,

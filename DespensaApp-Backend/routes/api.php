@@ -13,6 +13,7 @@ use App\Http\Controllers\CuentaCorrienteClienteController;
 use App\Http\Controllers\CobroClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaCorrienteProveedorController;
+use App\Http\Controllers\PagoProveedorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -63,9 +64,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/compras', [CompraController::class, 'index']);
         Route::get('/compras/{id}', [CompraController::class, 'show']);
 
-        // Rutas para Cuentas Corrientes de Proveedores (CU13)
+        // Rutas para Cuentas Corrientes de Proveedores 
         Route::get('/cc-proveedores', [CuentaCorrienteProveedorController::class, 'index']);
         Route::get('/cc-proveedores/{id}', [CuentaCorrienteProveedorController::class, 'show']);
+
+        // Rutas para Pagos a Proveedores 
+        Route::post('/pagos-proveedores', [PagoProveedorController::class, 'store']);
     });
 
     Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
