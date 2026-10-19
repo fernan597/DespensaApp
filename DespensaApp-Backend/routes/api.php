@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\MovimientoCajaController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\ProductController;
@@ -79,9 +80,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/marcas',     [MarcaController::class, 'index']);
 
         // --- Caja ---
-        Route::get('/caja/estado',  [CajaController::class, 'estado']);
-        Route::post('/caja/abrir',  [CajaController::class, 'abrir']);
-        Route::post('/caja/cerrar', [CajaController::class, 'cerrar']);
+        Route::get('/caja/estado',       [CajaController::class, 'estado']);
+        Route::post('/caja/abrir',       [CajaController::class, 'abrir']);
+        Route::post('/caja/cerrar',      [CajaController::class, 'cerrar']);
+        Route::post('/caja/movimientos', [MovimientoCajaController::class, 'store']);
 
         // --- Clientes ---
         Route::get('/clientes', [ClienteController::class, 'index']);

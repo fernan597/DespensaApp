@@ -144,9 +144,12 @@ class CajaTest extends TestCase
     public static function saldosInicialesInvalidos(): array
     {
         return [
-            'negativo' => [-1],
-            'texto'    => ['abc'],
-            'nulo'     => [null],
+            'negativo'             => [-1],
+            'texto'                => ['abc'],
+            'nulo'                 => [null],
+            'tres decimales'       => [1000.555],
+            'tres decimales string'=> ['1000.555'],
+            'notacion cientifica'   => ['1e3'],
         ];
     }
 

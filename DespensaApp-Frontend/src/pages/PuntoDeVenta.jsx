@@ -21,7 +21,7 @@ import { formatCurrency } from "../utils/formatters";
  *   - Columna derecha   (1/3): panel de cobro y confirmación
  */
 export function PuntoDeVenta() {
-    const { cajaAbierta, caja, loading: cajLoading, error: cajaError, handleAbrir, handleCerrar } = useCaja();
+    const { cajaAbierta, caja, loading: cajLoading, error: cajaError, handleAbrir, handleCerrar, handleMovimiento } = useCaja();
     const { items, agregarProducto, quitarProducto, cambiarCantidad, limpiarCarrito, totalVenta } = useCarritoVenta();
 
     const [productos, setProductos] = useState([]);
@@ -122,6 +122,7 @@ export function PuntoDeVenta() {
                 loading={cajLoading}
                 onAbrir={handleAbrir}
                 onCerrar={handleCerrar}
+                onMovimiento={handleMovimiento}
             />
 
             {cajaError && (

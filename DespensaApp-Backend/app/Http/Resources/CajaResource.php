@@ -35,18 +35,17 @@ class CajaResource extends JsonResource
             ]),
 
             // Campos calculados: solo se calculan si la caja está ABIERTA
-            // y sus movimientos fueron cargados (evita N+1 en el index de historial).
             'total_ingresos' => $this->when(
                 $this->estado === 'ABIERTA',
-                fn () => round($this->totalIngresos(), 2)
+                fn () => (float) $this->totalIngresos()
             ),
             'total_egresos' => $this->when(
                 $this->estado === 'ABIERTA',
-                fn () => round($this->totalEgresos(), 2)
+                fn () => (float) $this->totalEgresos()
             ),
             'saldo_esperado' => $this->when(
                 $this->estado === 'ABIERTA',
-                fn () => round($this->saldoEsperado(), 2)
+                fn () => (float) $this->saldoEsperado()
             ),
         ];
     }

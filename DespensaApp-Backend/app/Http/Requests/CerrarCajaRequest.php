@@ -21,20 +21,21 @@ class CerrarCajaRequest extends FormRequest
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-            'saldo_final' => 'required|numeric|min:0',
-        ];
-    }
+{
+    return [
+        'saldo_final' => ['required', 'numeric', 'min:0', 'regex:/^\d+(\.\d{1,2})?$/'],
+    ];
+}
 
-    public function messages(): array
-    {
-        return [
-            'saldo_final.required' => 'El saldo final es obligatorio.',
-            'saldo_final.numeric'  => 'El saldo final debe ser un número.',
-            'saldo_final.min'      => 'El saldo final no puede ser negativo.',
-        ];
-    }
+public function messages(): array
+{
+    return [
+        'saldo_final.required' => 'El saldo final es obligatorio.',
+        'saldo_final.numeric'  => 'El saldo final debe ser un número.',
+        'saldo_final.min'      => 'El saldo final no puede ser negativo.',
+        'saldo_final.regex'    => 'El saldo final debe tener como máximo 2 decimales.',
+    ];
+}
 
     public function attributes(): array
     {

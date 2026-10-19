@@ -12,6 +12,7 @@ class MovimientoCaja extends Model
 
     protected $fillable = [
         'caja_id',
+        'user_id',
         'monto',
         'tipo',
         'concepto',
@@ -61,6 +62,14 @@ class MovimientoCaja extends Model
     public function pagoProveedor(): BelongsTo
     {
         return $this->belongsTo(PagoProveedor::class, 'pago_proveedor_id');
+    }
+
+    /**
+     * El usuario que registró este movimiento de caja.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

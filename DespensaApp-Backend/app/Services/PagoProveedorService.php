@@ -74,13 +74,13 @@ class PagoProveedorService
                     );
                 }
 
-                $saldoDisponible = number_format($caja->saldoEsperado(), 2, '.', '');
+                $saldoDisponible = $caja->saldoEsperado();
                 if (bccomp($monto, $saldoDisponible, 2) === 1) {
                     throw new FondosInsuficientesException(
                         'Fondos insuficientes en la caja activa para registrar el pago en efectivo.',
                         [
-                            'saldo_disponible' => (float) $saldoDisponible,
-                            'monto_solicitado' => (float) $monto,
+                            'saldo_disponible' =>  $saldoDisponible,
+                            'monto_solicitado' =>  $monto,
                         ]
                     );
                 }

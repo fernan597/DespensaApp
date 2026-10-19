@@ -96,29 +96,30 @@ class CajaController extends Controller
             ], 404);
         }
 
-        $totalIngresos = $caja->totalIngresos();
-        $totalEgresos  = $caja->totalEgresos();
-        $saldoEsperado = $caja->saldoEsperado();
-        $saldoFinal    = (float) $request->saldo_final;
-        $diferencia    = round($saldoFinal - $saldoEsperado, 2);
+        $totalIngresos = $caja->totalIngresos();   // string "1350.25"
+$totalEgresos  = $caja->totalEgresos();
+$saldoEsperado = $caja->saldoEsperado();
+$saldoFinal    = bcadd((string) $request->validated('saldo_final'), '0', 2);
+$diferencia    = bcsub($saldoFinal, $saldoEsperado, 2);
 
-        $caja->update([
-            'usuario_cierre_id' => $request->user()->id,
-            'fecha_cierre'      => now(),
-            'saldo_final'       => $saldoFinal,
-            'estado'            => 'CERRADA',
-        ]);
+$caja->update([
+    'usuario_cierre_id' => $request->user()->id,
+    'fecha_cierre'      => now(),
+    'saldo_final'       => $saldoFinal,
+    'estado'            => 'CERRADA',
+]);
 
-        $caja->load('usuarioCierre:id,name');
+$caja->load('usuarioCierre:id,name');
 
-        $resumen = [
-            'saldo_inicial'         => round((float) $caja->saldo_inicial, 2),
-            'total_ingresos'        => round($totalIngresos, 2),
-            'total_egresos'         => round($totalEgresos, 2),
-            'saldo_esperado'        => round($saldoEsperado, 2),
-            'saldo_final_declarado' => $saldoFinal,
-            'diferencia'            => $diferencia,
-        ];
+// (float) solo al armar el JSON: los cálculos ya terminaron.
+$resumen = [
+    'saldo_inicial'         => (float) $caja->saldo_inicial,
+    'total_ingresos'        => (float) $totalIngresos,
+    'total_egresos'         => (float) $totalEgresos,
+    'saldo_esperado'        => (float) $saldoEsperado,
+    'saldo_final_declarado' => (float) $saldoFinal,
+    'diferencia'            => (float) $diferencia,
+];
 
         return response()->json([
             'message' => 'Caja cerrada correctamente.',

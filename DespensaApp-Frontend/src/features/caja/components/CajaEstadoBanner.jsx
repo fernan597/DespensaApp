@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { AbrirCajaModal } from "./AbrirCajaModal";
 import { CerrarCajaModal } from "./CerrarCajaModal";
+import { MovimientoManualCajaModal } from "./MovimientoManualCajaModal";
 
 /**
  * Banner persistente que muestra el estado de la caja en la página de Punto de Venta.
  * - Si está CERRADA: muestra alerta y botón para abrir.
- * - Si está ABIERTA: muestra datos del turno y botón para cerrar.
+ * - Si está ABIERTA: muestra datos del turno, métricas y botones para movimientos y cierre.
  *
  * @param {{
  *   cajaAbierta: boolean,
  *   caja: object|null,
  *   loading: boolean,
  *   onAbrir: (saldoInicial: number) => Promise<boolean>,
- *   onCerrar: (saldoFinal: number) => Promise<object|null>
+ *   onCerrar: (saldoFinal: number) => Promise<object|null>,
+ *   onMovimiento?: (data: { tipo: "INGRESO"|"EGRESO", monto: number, concepto: string }) => Promise<boolean>
  * }} props
  */
-export function CajaEstadoBanner({ cajaAbierta, caja, loading, onAbrir, onCerrar }) {
+export function CajaEstadoBanner({ cajaAbierta, caja, loading, onAbrir, onCerrar, onMovimiento }) {
     const [showAbrirModal, setShowAbrirModal] = useState(false);
     const [showCerrarModal, setShowCerrarModal] = useState(false);
+    const [showMovimientoModal, setShowMovimientoModal] = useState(false);
 
     if (loading) {
         return (
@@ -100,6 +103,12 @@ export function CajaEstadoBanner({ cajaAbierta, caja, loading, onAbrir, onCerrar
                         </p>
                     </div>
                     <div className="text-center">
+                        <p className="text-on-surface-variant text-label-sm">Egresos</p>
+                        <p className="font-semibold text-amber-700">
+                            ${(caja?.total_egresos ?? 0).toFixed(2)}
+                        </p>
+                    </div>
+                    <div className="text-center">
                         <p className="text-on-surface-variant text-label-sm">Saldo esperado</p>
                         <p className="font-semibold text-on-surface">
                             ${(caja?.saldo_esperado ?? caja?.saldo_inicial ?? 0).toFixed(2)}
@@ -107,16 +116,39 @@ export function CajaEstadoBanner({ cajaAbierta, caja, loading, onAbrir, onCerrar
                     </div>
                 </div>
 
-                {/* Botón cerrar */}
-                <button
-                    id="btn-cerrar-caja"
-                    onClick={() => setShowCerrarModal(true)}
-                    className="shrink-0 flex items-center gap-xs px-lg py-sm bg-error text-on-error rounded-full text-label-md font-label-md hover:bg-error/90 transition-colors"
-                >
-                    <span className="material-symbols-outlined text-[18px]">lock</span>
-                    Cerrar Caja
-                </button>
+                {/* Botones de acción */}
+                <div className="flex items-center gap-xs shrink-0">
+                    {onMovimiento && (
+                        <button
+                            id="btn-movimiento-caja"
+                            type="button"
+                            onClick={() => setShowMovimientoModal(true)}
+                            className="flex items-center gap-xs px-md py-sm bg-surface-container-high text-on-surface rounded-full text-label-md font-semibold hover:bg-surface-container-highest border border-outline-variant/30 transition-colors shadow-sm"
+                            title="Registrar entrada o salida manual de efectivo"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">payments</span>
+                            Movimiento
+                        </button>
+                    )}
+                    <button
+                        id="btn-cerrar-caja"
+                        onClick={() => setShowCerrarModal(true)}
+                        className="flex items-center gap-xs px-lg py-sm bg-error text-on-error rounded-full text-label-md font-label-md hover:bg-error/90 transition-colors"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">lock</span>
+                        Cerrar Caja
+                    </button>
+                </div>
             </div>
+
+            {onMovimiento && (
+                <MovimientoManualCajaModal
+                    isOpen={showMovimientoModal}
+                    onClose={() => setShowMovimientoModal(false)}
+                    onConfirm={onMovimiento}
+                    saldoDisponible={caja?.saldo_esperado ?? caja?.saldo_inicial ?? 0}
+                />
+            )}
 
             <CerrarCajaModal
                 isOpen={showCerrarModal}

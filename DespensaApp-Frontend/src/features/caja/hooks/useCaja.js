@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { getCajaEstado, abrirCaja, cerrarCaja } from "../../../services/cajaService";
+import { getCajaEstado, abrirCaja, cerrarCaja, registrarMovimientoCaja } from "../../../services/cajaService";
 
 /**
  * Hook central para gestionar el estado de la caja.
  * Consultado al montar para saber si hay caja abierta.
- * Expone handlers para abrir y cerrar el turno.
+ * Expone handlers para abrir, cerrar y registrar movimientos en el turno.
  */
 export function useCaja() {
     const [cajaAbierta, setCajaAbierta] = useState(false);
@@ -68,6 +68,23 @@ export function useCaja() {
         }
     };
 
+    /**
+     * Registra un movimiento manual de efectivo en la caja activa.
+     * @param {{ tipo: "INGRESO"|"EGRESO", monto: number, concepto: string }} data
+     * @returns {Promise<boolean>} true si se registró correctamente
+     */
+    const handleMovimiento = async (data) => {
+        try {
+            setError(null);
+            await registrarMovimientoCaja(data);
+            await fetchEstado(); // Refresca el estado y nuevo saldo esperado
+            return true;
+        } catch (err) {
+            setError(err.message || "Error al registrar el movimiento de caja.");
+            throw err;
+        }
+    };
+
     return {
         cajaAbierta,
         caja,
@@ -76,5 +93,6 @@ export function useCaja() {
         fetchEstado,
         handleAbrir,
         handleCerrar,
+        handleMovimiento,
     };
 }

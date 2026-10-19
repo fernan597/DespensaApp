@@ -98,7 +98,7 @@ class PagoProveedorTest extends TestCase
         ]);
 
         // 5. Verifica que el saldo esperado de la caja disminuyó
-        $this->assertEquals(8000.00, $this->caja->fresh()->saldoEsperado());
+        $this->assertSame('8000.00', $this->caja->fresh()->saldoEsperado());
     }
 
     public function test_pago_transferencia_exitoso_no_afecta_caja(): void
@@ -119,7 +119,7 @@ class PagoProveedorTest extends TestCase
 
         // Verifica que no se generó ningún movimiento de caja
         $this->assertDatabaseCount('movimientos_caja', 0);
-        $this->assertEquals(10000.00, $this->caja->fresh()->saldoEsperado());
+        $this->assertSame('10000.00', $this->caja->fresh()->saldoEsperado());
 
         // Verifica que la deuda sí disminuyó
         $this->assertEquals(3500.00, (float) $this->proveedor->fresh()->saldo_adeudado);

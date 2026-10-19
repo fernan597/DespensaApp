@@ -23,7 +23,7 @@ class AbrirCajaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'saldo_inicial' => 'required|numeric|min:0',
+            'saldo_inicial' => ['required', 'numeric', 'min:0', 'regex:/^\d+(\.\d{1,2})?$/'],
         ];
     }
 
@@ -33,6 +33,7 @@ class AbrirCajaRequest extends FormRequest
             'saldo_inicial.required' => 'El saldo inicial es obligatorio.',
             'saldo_inicial.numeric'  => 'El saldo inicial debe ser un número.',
             'saldo_inicial.min'      => 'El saldo inicial no puede ser negativo.',
+            'saldo_inicial.regex'    => 'El saldo inicial debe tener como máximo 2 decimales.',
         ];
     }
 

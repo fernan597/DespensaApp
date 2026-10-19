@@ -1,0 +1,35 @@
+# Dependencias (NUNCA deben subirse a Git)
+**/vendor/
+**/node_modules/
+**/dist/
+
+# Variables de entorno y credenciales
+**/.env
+**/.env.*
+!**/.env.example
+
+# Laravel Cache y Storage
+**/storage/logs/*.log
+**/storage/framework/cache/data/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/storage/framework/testing/*
+**/bootstrap/cache/*.php
+!**/bootstrap/cache/.gitignore
+.phpunit.result.cache
+
+# Frontend / Vite
+**/.vite/
+**/coverage/
+
+# IDEs y SO
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+Desktop.ini
+.DS_Store

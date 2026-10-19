@@ -178,7 +178,7 @@ class PagoProveedorBordesTest extends TestCase
         $this->postJson(self::ENDPOINT, $this->payload(['monto' => 500.00]))
             ->assertStatus(201);
 
-        $this->assertEquals(0.00, $this->caja->fresh()->saldoEsperado());
+        $this->assertSame('0.00', $this->caja->fresh()->saldoEsperado());
     }
 
     public function test_rechaza_un_centavo_mas_que_el_efectivo_disponible(): void
@@ -211,7 +211,7 @@ class PagoProveedorBordesTest extends TestCase
         $this->postJson(self::ENDPOINT, $this->payload(['monto' => 1000.00]))
             ->assertStatus(201);
 
-        $this->assertEquals(100.00, $this->caja->fresh()->saldoEsperado());
+        $this->assertSame('100.00', $this->caja->fresh()->saldoEsperado());
     }
 
     public function test_transferencia_no_requiere_caja_abierta(): void
