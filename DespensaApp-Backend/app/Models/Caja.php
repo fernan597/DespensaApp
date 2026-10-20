@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TipoMovimientoCaja;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,28 +53,58 @@ class Caja extends Model
     {
         return $query->where('estado', 'ABIERTA');
     }
-    /**
-     * Calcula el saldo esperado según los movimientos registrados.
-     */
+    /*
+      Calcula el saldo esperado según los movimientos registrados.
+     
     public function saldoEsperado(): float
     {
         $ingresos = $this->totalIngresos();
         $egresos = $this->totalEgresos();
         return (float) ($this->saldo_inicial + $ingresos - $egresos);
-    }
+    }*/
 
-     public function totalIngresos():float
+    public function totalIngresos(): string
     {
-        return (float) $this->movimientos()
-            ->whereIn('tipo', ['INGRESO_VENTA', 'INGRESO_COBRO_CLIENTE'])
+        $suma = $this->movimientos()
+            ->whereIn('tipo', [
+                TipoMovimientoCaja::INGRESO_VENTA,
+                TipoMovimientoCaja::INGRESO_COBRO_CLIENTE,
+                TipoMovimientoCaja::INGRESO_MANUAL,
+                TipoMovimientoCaja::AJUSTE_MANUAL,
+            ])
             ->sum('monto');
+
+            // Si $suma es null (porque no hay ingresos), usamos '0'.
+            // bcadd lo formatea forzando los 2 decimales, devolviendo "0.00" o el monto exacto.
+            return bcadd((string) ($suma ?? '0'), '0', 2);
     }
 
-    public function totalEgresos():float
+    public function totalEgresos(): string
     {
-        return (float) $this->movimientos()
-            ->whereIn('tipo', ['EGRESO_PAGO_PROVEEDOR', 'EGRESO_GASTO_VARIOS'])
+        $suma = $this->movimientos()
+            ->whereIn('tipo', [
+                TipoMovimientoCaja::EGRESO_PAGO_PROVEEDOR,
+                TipoMovimientoCaja::EGRESO_GASTO_VARIOS,
+                TipoMovimientoCaja::EGRESO_MANUAL,
+            ])
             ->sum('monto');
+
+            // Si $suma es null (porque no hay egresos), usamos '0'.
+            // bcadd lo formatea forzando los 2 decimales, devolviendo "0.00" o el monto exacto.
+            return bcadd((string) ($suma ?? '0'), '0', 2);
     }
 
+    // Calcula el saldo esperado según los movimientos registrados.
+    public function saldoEsperado(): string
+    {
+        $ingresos = $this->totalIngresos();
+        $egresos  = $this->totalEgresos();
+        
+        //(saldo_inicial - egresos) + ingresos
+        return bcadd(
+            bcsub((string) $this->saldo_inicial, (string) $egresos, 2),
+            (string) $ingresos,
+            2
+        );
+    }
 }

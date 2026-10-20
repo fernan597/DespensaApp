@@ -1,3 +1,5 @@
+import { formatCurrency } from "../../../utils/formatters";
+
 /**
  * Tabla de ítems del carrito de la venta en curso.
  *
@@ -44,13 +46,13 @@ export function CarritoVenta({ items, onQuitar, onCambiarCantidad, totalVenta })
                             {producto.nombre}
                         </p>
                         <p className="text-label-sm text-on-surface-variant sm:hidden">
-                            ${producto.precio_venta?.toFixed(2)} c/u
+                            {formatCurrency(producto.precio_venta)} c/u
                         </p>
                     </div>
 
                     {/* Precio unitario (solo escritorio) */}
                     <span className="hidden sm:block text-body-md text-on-surface-variant text-right w-24">
-                        ${producto.precio_venta?.toFixed(2)}
+                        {formatCurrency(producto.precio_venta)}
                     </span>
 
                     {/* Input de cantidad */}
@@ -66,7 +68,7 @@ export function CarritoVenta({ items, onQuitar, onCambiarCantidad, totalVenta })
 
                     {/* Subtotal */}
                     <span className="hidden sm:block text-body-md font-bold text-on-surface text-right w-24">
-                        ${subtotal.toFixed(2)}
+                        {formatCurrency(subtotal)}
                     </span>
 
                     {/* Botón quitar */}
@@ -84,7 +86,7 @@ export function CarritoVenta({ items, onQuitar, onCambiarCantidad, totalVenta })
             <div className="flex items-center justify-between px-sm pt-sm border-t border-outline-variant mt-sm">
                 <span className="text-title-md font-bold text-on-surface">Total</span>
                 <span className="text-title-lg font-bold text-primary">
-                    ${totalVenta.toFixed(2)}
+                    {formatCurrency(totalVenta)}
                 </span>
             </div>
         </div>

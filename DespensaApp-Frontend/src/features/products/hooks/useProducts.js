@@ -31,11 +31,11 @@ export function useProducts() {
     const fetchProducts = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getProducts();
-            const productList = Array.isArray(data) ? data : data?.products || [];
-            setProducts(productList);
+            const response = await getProducts();
+            setProducts(response || []);
         } catch (error) {
             console.error("Error al cargar productos:", error);
+            setProducts([]);
         } finally {
             setLoading(false);
         }
@@ -63,9 +63,10 @@ export function useProducts() {
 
     // Búsqueda instantánea en memoria (0ms de latencia, sin peticiones de red)
     const filteredProducts = useMemo(() => {
-        if (!search.trim()) return products;
+        const list = Array.isArray(products) ? products : [];
+        if (!search.trim()) return list;
         const q = search.toLowerCase();
-        return products.filter((p) =>
+        return list.filter((p) =>
             (p.nombre && p.nombre.toLowerCase().includes(q)) ||
             (p.codigo_barra && p.codigo_barra.toLowerCase().includes(q)) ||
             (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(q)) ||

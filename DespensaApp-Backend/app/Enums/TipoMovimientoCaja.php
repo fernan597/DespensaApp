@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Enums;
+
+enum TipoMovimientoCaja: string
+{
+    case INGRESO_VENTA = 'INGRESO_VENTA';
+    case INGRESO_COBRO_CLIENTE = 'INGRESO_COBRO_CLIENTE';
+    case EGRESO_PAGO_PROVEEDOR = 'EGRESO_PAGO_PROVEEDOR';
+    case EGRESO_GASTO_VARIOS = 'EGRESO_GASTO_VARIOS';
+    case AJUSTE_MANUAL = 'AJUSTE_MANUAL';
+    case INGRESO_MANUAL = 'INGRESO_MANUAL';
+    case EGRESO_MANUAL = 'EGRESO_MANUAL';
+}

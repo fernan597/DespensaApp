@@ -6,7 +6,11 @@ import { LoginForm } from "./pages/login";
 import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
 import { AdminProducts } from "./pages/AdminProducts";
+import { AdminProveedores } from "./pages/AdminProveedores";
 import { PuntoDeVenta } from "./pages/PuntoDeVenta";
+import { RegistrarCompra } from "./pages/RegistrarCompra";
+import { CuentaCorrienteProveedor } from "./pages/CuentaCorrienteProveedor";
+import { CuentaCorrienteCliente } from "./pages/CuentaCorrienteCliente";
 import { MainLayout } from "./components/MainLayout";
 
 function App() {
@@ -29,14 +33,18 @@ function App() {
                 <Route path="/admin/usuarios" element={<AdminUsers />} />
               </Route>
 
-              {/* Exclusivo Admin Despensa — Gestión de Productos */}
+              {/* Exclusivo Admin Despensa — Gestión de Productos, Proveedores, Compras y Cuentas Corrientes */}
               <Route element={<RoleRoute roles={["admin_despensa"]} />}>
                 <Route path="/admin/productos" element={<AdminProducts />} />
+                <Route path="/admin/proveedores" element={<AdminProveedores />} />
+                <Route path="/admin/compras" element={<RegistrarCompra />} />
+                <Route path="/admin/cuentas-corrientes-proveedores" element={<CuentaCorrienteProveedor />} />
               </Route>
 
-              {/* Punto de Venta — empleado y admin_despensa */}
+              {/* Punto de Venta y Cuentas Corrientes Clientes — empleado y admin_despensa */}
               <Route element={<RoleRoute roles={["admin_despensa", "empleado"]} />}>
                 <Route path="/punto-de-venta" element={<PuntoDeVenta />} />
+                <Route path="/cuentas-corrientes-clientes" element={<CuentaCorrienteCliente />} />
               </Route>
 
             </Route>

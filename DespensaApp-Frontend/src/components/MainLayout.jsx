@@ -50,8 +50,24 @@ export function MainLayout() {
                         <SidebarNavLink to="/admin/productos" icon="inventory_2" label="Productos y Stock" />
                     )}
 
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/proveedores" icon="local_shipping" label="Proveedores" />
+                    )}
+
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/compras" icon="shopping_bag" label="Registrar Compra" />
+                    )}
+
+                    {isAdminDespensa && (
+                        <SidebarNavLink to="/admin/cuentas-corrientes-proveedores" icon="account_balance_wallet" label="CC Proveedores" />
+                    )}
+
                     {canUsePOS && (
                         <SidebarNavLink to="/punto-de-venta" icon="point_of_sale" label="Punto de Venta" />
+                    )}
+
+                    {canUsePOS && (
+                        <SidebarNavLink to="/cuentas-corrientes-clientes" icon="contact_page" label="CC Clientes" />
                     )}
 
                     {/* Botón Cerrar Sesión */}

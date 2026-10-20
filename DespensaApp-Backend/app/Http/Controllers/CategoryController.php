@@ -33,9 +33,6 @@ class CategoryController extends Controller
             return response()->json([
                 'ok' => false,
                 'message' => 'Error al crear la categoría.',
-                'error' => $e->getMessage(), // temporal, solo para debug
-                'line' => $e->getLine(),
-        'file' => $e->getFile(),
             ], 500);
         }
     }

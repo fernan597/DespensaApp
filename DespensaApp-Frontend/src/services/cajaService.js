@@ -43,3 +43,16 @@ export async function getHistorialCajas() {
     const data = await apiFetch("/cajas");
     return data.cajas;
 }
+
+/**
+ * Registra un movimiento manual de efectivo en la caja activa (ingreso o egreso).
+ * @param {{ tipo: "INGRESO"|"EGRESO", monto: number, concepto: string }} data
+ * @returns {{ success: boolean, message: string, data: object }}
+ */
+export async function registrarMovimientoCaja({ tipo, monto, concepto }) {
+    const data = await apiFetch("/caja/movimientos", {
+        method: "POST",
+        body: JSON.stringify({ tipo, monto, concepto }),
+    });
+    return data;
+}

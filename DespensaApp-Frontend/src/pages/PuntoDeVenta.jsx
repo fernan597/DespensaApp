@@ -1,23 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { CajaEstadoBanner } from "../features/caja/components/CajaEstadoBanner";
-import { BuscadorProducto } from "../features/ventas/components/BuscadorProducto";
+import { BuscadorProducto } from "../features/products/components/BuscadorProducto";
 import { CarritoVenta } from "../features/ventas/components/CarritoVenta";
 import { PanelPago } from "../features/ventas/components/PanelPago";
+import { ClienteSelectorModal } from "../features/ventas/components/ClienteSelectorModal";
 import { useCaja } from "../features/caja/hooks/useCaja";
 import { useCarritoVenta } from "../features/ventas/hooks/useCarritoVenta";
 import { getProducts } from "../services/productService";
-import { registrarVentaContado } from "../services/ventaService";
+import { registrarVentaContado, registrarVentaCredito } from "../services/ventaService";
+import { formatCurrency } from "../utils/formatters";
 
 /**
  * Página del Punto de Venta.
  * Roles: admin_despensa, empleado.
  *
+ * Soporta ventas de Contado y ventas a Crédito (Fiado en Cuenta Corriente).
+ *
  * Layout:
  *   - Columna izquierda (2/3): banner de caja + buscador + carrito
- *   - Columna derecha   (1/3): panel de pago y confirmación
+ *   - Columna derecha   (1/3): panel de cobro y confirmación
  */
 export function PuntoDeVenta() {
-    const { cajaAbierta, caja, loading: cajLoading, error: cajaError, handleAbrir, handleCerrar } = useCaja();
+    const { cajaAbierta, caja, loading: cajLoading, error: cajaError, handleAbrir, handleCerrar, handleMovimiento } = useCaja();
     const { items, agregarProducto, quitarProducto, cambiarCantidad, limpiarCarrito, totalVenta } = useCarritoVenta();
 
     const [productos, setProductos] = useState([]);
@@ -25,6 +29,10 @@ export function PuntoDeVenta() {
     const [loadingVenta, setLoadingVenta] = useState(false);
     const [ventaError, setVentaError] = useState(null);
     const [ventaExitosa, setVentaExitosa] = useState(null); // Guarda la última venta registrada
+
+    // Gestión del cliente seleccionado para ventas
+    const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+    const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
 
     // Cargar catálogo de productos al montar (una sola vez)
     const fetchProductos = useCallback(async () => {
@@ -44,30 +52,49 @@ export function PuntoDeVenta() {
     }, [fetchProductos]);
 
     /**
-     * Construye el payload y llama a la API para registrar la venta.
-     * Si tiene éxito: limpia el carrito, refresca el catálogo y muestra confirmación.
+     * Construye el payload y llama a la API según la modalidad (Contado o Crédito).
+     * Si tiene éxito: limpia el carrito, resetea el cliente, refresca el stock y muestra confirmación.
      */
-    const handleConfirmarVenta = async ({ cliente_id, medio_pago }) => {
+    const handleConfirmarVenta = async ({ tipo_venta, cliente_id, medio_pago }) => {
         if (items.length === 0) return;
 
-        const payload = {
-            cliente_id: cliente_id ?? null,
-            medio_pago,
-            items: items.map((i) => ({
-                producto_id: i.producto.id,
-                cantidad: i.cantidad,
-            })),
-        };
+        if (tipo_venta === "CREDITO" && !cliente_id) {
+            setVentaError("Debe seleccionar un cliente registrado para vender a crédito.");
+            return;
+        }
 
         try {
             setLoadingVenta(true);
             setVentaError(null);
-            const data = await registrarVentaContado(payload);
+
+            const itemsPayload = items.map((i) => ({
+                producto_id: i.producto.id,
+                cantidad: i.cantidad,
+            }));
+
+            let data;
+            if (tipo_venta === "CREDITO") {
+                data = await registrarVentaCredito({
+                    cliente_id,
+                    items: itemsPayload,
+                });
+            } else {
+                data = await registrarVentaContado({
+                    cliente_id: cliente_id ?? null,
+                    medio_pago,
+                    items: itemsPayload,
+                });
+            }
+
             setVentaExitosa(data.venta);
             limpiarCarrito();
+            setClienteSeleccionado(null);
             fetchProductos(); // Refresca stock actualizado
         } catch (err) {
-            setVentaError(err.message || "Error al registrar la venta.");
+            const primerError = err.data?.errors
+                ? Object.values(err.data.errors).flat()[0]
+                : null;
+            setVentaError(primerError || err.message || "Error al registrar la venta.");
         } finally {
             setLoadingVenta(false);
         }
@@ -84,7 +111,7 @@ export function PuntoDeVenta() {
                     Punto de Venta
                 </h1>
                 <p className="text-body-md text-on-surface-variant">
-                    Registrá ventas de contado en tiempo real.
+                    Registrá ventas de contado y fiado a crédito en tiempo real.
                 </p>
             </header>
 
@@ -95,6 +122,7 @@ export function PuntoDeVenta() {
                 loading={cajLoading}
                 onAbrir={handleAbrir}
                 onCerrar={handleCerrar}
+                onMovimiento={handleMovimiento}
             />
 
             {cajaError && (
@@ -124,9 +152,17 @@ export function PuntoDeVenta() {
                         <span className="material-symbols-outlined text-green-600 text-[22px]">
                             check_circle
                         </span>
-                        <p className="text-body-md font-semibold text-green-700">
-                            Venta #{ventaExitosa.id} registrada — Total: ${Number(ventaExitosa.total).toFixed(2)}
-                        </p>
+                        <div>
+                            <p className="text-body-md font-semibold text-green-700">
+                                Venta #{ventaExitosa.id} registrada correctamente — Total: {formatCurrency(ventaExitosa.total)}
+                            </p>
+                            <p className="text-xs text-green-800">
+                                Modalidad: {ventaExitosa.tipo_venta === "CUENTA_CORRIENTE" ? "Crédito / Fiado (Cuenta Corriente)" : "Contado"}
+                                {ventaExitosa.cliente && (
+                                    <> · Cliente: {ventaExitosa.cliente.nombre} {ventaExitosa.cliente.apellido || ""}</>
+                                )}
+                            </p>
+                        </div>
                     </div>
                     <button
                         onClick={() => setVentaExitosa(null)}
@@ -163,23 +199,34 @@ export function PuntoDeVenta() {
                     />
                 </div>
 
-                {/* Columna derecha: panel de pago */}
+                {/* Columna derecha: panel de cobro */}
                 <div className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-md shadow-sm">
                     <h2 className="text-title-sm font-bold text-on-surface mb-md flex items-center gap-xs">
                         <span className="material-symbols-outlined text-[20px] text-primary">
-                            payments
+                            receipt_long
                         </span>
                         Cobro
                     </h2>
                     <PanelPago
                         totalVenta={totalVenta}
-                        clientes={[]}
+                        clienteSeleccionado={clienteSeleccionado}
+                        onOpenClienteModal={() => setIsClienteModalOpen(true)}
+                        onClearCliente={() => setClienteSeleccionado(null)}
                         onConfirmar={handleConfirmarVenta}
                         loading={loadingVenta}
-                        disabled={!cajaAbierta || items.length === 0}
+                        cajaAbierta={cajaAbierta}
+                        itemsLength={items.length}
                     />
                 </div>
             </div>
+
+            {/* Modal para seleccionar cliente registrado */}
+            <ClienteSelectorModal
+                isOpen={isClienteModalOpen}
+                onClose={() => setIsClienteModalOpen(false)}
+                onSelect={(cliente) => setClienteSeleccionado(cliente)}
+                selectedClienteId={clienteSeleccionado?.id}
+            />
         </div>
     );
 }

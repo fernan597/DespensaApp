@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -14,7 +15,7 @@ class UserController extends Controller
         
         return response()->json([
             'ok' => true,
-            'users' => $users,
+            'users' => UserResource::collection($users),
         ]);
     }
 
@@ -32,7 +33,7 @@ class UserController extends Controller
 
             return response()->json([
                 'ok' => true,
-                'user' => $user,
+                'user' => new UserResource($user),
             ], 201);
         } catch (\Exception $e) {
             return response()->json([

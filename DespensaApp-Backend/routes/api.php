@@ -2,11 +2,19 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\MovimientoCajaController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CuentaCorrienteClienteController;
+use App\Http\Controllers\CobroClienteController;
+use App\Http\Controllers\CompraController;
+use App\Http\Controllers\CuentaCorrienteProveedorController;
+use App\Http\Controllers\PagoProveedorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,10 +32,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Rutas protegidas — requieren token Sanctum válido
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
-    });
+    
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
     
 
     // Rutas protegidas por rol
@@ -47,6 +54,23 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/marcas/{id}', [MarcaController::class, 'destroy']);
         // Historial de cajas (solo admin del negocio)
         Route::get('/cajas', [CajaController::class, 'index']);
+
+        //Rutas para los proveedores
+        Route::apiResource('proveedores', ProveedorController::class)->parameters([
+            'proveedores' => 'proveedor'
+        ]);
+
+        // Rutas para compras de mercadería
+        Route::post('/compras', [CompraController::class, 'store']);
+        Route::get('/compras', [CompraController::class, 'index']);
+        Route::get('/compras/{id}', [CompraController::class, 'show']);
+
+        // Rutas para Cuentas Corrientes de Proveedores 
+        Route::get('/cc-proveedores', [CuentaCorrienteProveedorController::class, 'index']);
+        Route::get('/cc-proveedores/{id}', [CuentaCorrienteProveedorController::class, 'show']);
+
+        // Rutas para Pagos a Proveedores 
+        Route::post('/pagos-proveedores', [PagoProveedorController::class, 'store']);
     });
 
     Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
@@ -56,14 +80,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/marcas',     [MarcaController::class, 'index']);
 
         // --- Caja ---
-        Route::get('/caja/estado',  [CajaController::class, 'estado']);
-        Route::post('/caja/abrir',  [CajaController::class, 'abrir']);
-        Route::post('/caja/cerrar', [CajaController::class, 'cerrar']);
+        Route::get('/caja/estado',       [CajaController::class, 'estado']);
+        Route::post('/caja/abrir',       [CajaController::class, 'abrir']);
+        Route::post('/caja/cerrar',      [CajaController::class, 'cerrar']);
+        Route::post('/caja/movimientos', [MovimientoCajaController::class, 'store']);
+
+        // --- Clientes ---
+        Route::get('/clientes', [ClienteController::class, 'index']);
 
         // --- Ventas ---
         Route::post('/ventas/contado', [VentaController::class, 'storeContado']);
+        Route::post('/ventas/credito', [VentaController::class, 'storeCredito']);
         Route::get('/ventas',          [VentaController::class, 'index']);
-        Route::get('/ventas/{id}',     [VentaController::class, 'show']);
+        Route::get('/ventas/{venta}',  [VentaController::class, 'show']);
+
+        // --- Cuentas Corrientes y Cobros de Clientes (CU11 y CU12) ---
+        Route::get('/cc-clientes',     [CuentaCorrienteClienteController::class, 'index']);
+        Route::get('/cc-clientes/{id}', [CuentaCorrienteClienteController::class, 'show']);
+        Route::post('/cobros-clientes', [CobroClienteController::class, 'store']);
     });
 
 });
