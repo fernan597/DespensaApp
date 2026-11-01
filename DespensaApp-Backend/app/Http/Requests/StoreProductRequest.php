@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -29,9 +30,15 @@ class StoreProductRequest extends FormRequest
             'stock_minimo' => 'required|integer',
             'precio_compra' => 'required|numeric',
             'precio_venta' => 'required|numeric',
-            'categoria_id' => 'required|exists:categories,id',
+            'categoria_id' => [
+                'required',
+                Rule::exists('categories', 'id')->whereNull('deleted_at'),
+            ],
             'marca_nombre' => 'required_without:marca_id|nullable|string|max:255',
-            'marca_id' => 'nullable|exists:marcas,id',
+            'marca_id' => [
+                'nullable',
+                Rule::exists('marcas', 'id')->whereNull('deleted_at'),
+            ],
         ];
     }
 

@@ -27,13 +27,17 @@ class StoreCompraRequest extends FormRequest
             'proveedor_id'          => [
                 'required',
                 Rule::exists('proveedores', 'id')->where(function ($query) {
-                    $query->where('activo', true);
+                    $query->where('activo', true)->whereNull('deleted_at');
                 }),
             ],
             'tipo_pago'             => 'required|in:CONTADO,CREDITO,CUENTA_CORRIENTE',
             'numero_comprobante'    => 'nullable|string|max:100',
             'items'                 => 'required|array|min:1',
-            'items.*.producto_id'   => 'required|exists:products,id|distinct',
+            'items.*.producto_id'   => [
+                'required',
+                'distinct',
+                Rule::exists('products', 'id')->whereNull('deleted_at'),
+            ],
             'items.*.cantidad'      => 'required|integer|min:1',
             'items.*.costo_unitario'=> 'required|numeric|gt:0',
         ];

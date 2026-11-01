@@ -34,12 +34,12 @@ class Product extends Model
 
     public function categoria()
     {
-        return $this->belongsTo(Category::class, 'categoria_id');
+        return $this->belongsTo(Category::class, 'categoria_id')->withTrashed();
     }
 
     public function marca()
     {
-        return $this->belongsTo(Marca::class, 'marca_id');
+        return $this->belongsTo(Marca::class, 'marca_id')->withTrashed();
     }
 
     public function detallesCompra()

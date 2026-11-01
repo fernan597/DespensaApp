@@ -35,10 +35,10 @@ class DetalleCompra extends Model
     }
 
     /**
-     * Producto adquirido.
+     * Producto adquirido (incluye dados de baja lógicamente para preservar el historial).
      */
     public function producto(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id')->withTrashed();
     }
 }

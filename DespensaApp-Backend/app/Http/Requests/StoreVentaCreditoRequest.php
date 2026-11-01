@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class StoreVentaCreditoRequest extends BaseVentaRequest
 {
     /**
@@ -12,7 +14,10 @@ class StoreVentaCreditoRequest extends BaseVentaRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'cliente_id' => 'required|exists:clientes,id',
+            'cliente_id' => [
+                'required',
+                Rule::exists('clientes', 'id')->whereNull('deleted_at'),
+            ],
         ]);
     }
 

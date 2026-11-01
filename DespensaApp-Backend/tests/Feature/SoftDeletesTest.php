@@ -177,4 +177,77 @@ class SoftDeletesTest extends TestCase
         $this->assertNull(Marca::find($marca->id));
         $this->assertNotNull(Marca::withTrashed()->find($marca->id)->deleted_at);
     }
+
+    public function test_venta_historica_conserva_datos_de_producto_eliminado_logicamente(): void
+    {
+        $categoria = Category::create(['nombre' => 'Bebidas']);
+        $marca     = Marca::create(['nombre' => 'Coca Cola']);
+
+        $producto = Product::create([
+            'nombre'        => 'Gaseosa Cola 1.5L',
+            'codigo_barra'  => '7799999999999',
+            'stock_actual'  => 20,
+            'stock_minimo'  => 5,
+            'precio_compra' => '1000.00',
+            'precio_venta'  => '1500.00',
+            'categoria_id'  => $categoria->id,
+            'marca_id'      => $marca->id,
+        ]);
+
+        $venta = Venta::create([
+            'user_id'    => $this->admin->id,
+            'total'      => '1500.00',
+            'tipo_venta' => 'CONTADO',
+            'medio_pago' => 'EFECTIVO',
+            'estado'     => 'COMPLETADA',
+        ]);
+
+        DetalleVenta::create([
+            'venta_id'        => $venta->id,
+            'product_id'      => $producto->id,
+            'cantidad'        => 1,
+            'precio_unitario' => '1500.00',
+            'subtotal'        => '1500.00',
+        ]);
+
+        // Dar de baja lógicamente el producto
+        $producto->delete();
+
+        // Al consultar el ticket histórico, el producto sigue visible en el detalle
+        $response = $this->actingAs($this->admin)
+            ->getJson("/api/ventas/{$venta->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.detalles.0.producto.nombre', 'Gaseosa Cola 1.5L');
+    }
+
+    public function test_no_permite_vender_producto_eliminado_logicamente_retornando_422(): void
+    {
+        $categoria = Category::create(['nombre' => 'Almacén']);
+        $marca     = Marca::create(['nombre' => 'Genérica']);
+
+        $producto = Product::create([
+            'nombre'        => 'Producto Dado de Baja',
+            'codigo_barra'  => '7790000000111',
+            'stock_actual'  => 10,
+            'stock_minimo'  => 2,
+            'precio_compra' => '400.00',
+            'precio_venta'  => '700.00',
+            'categoria_id'  => $categoria->id,
+            'marca_id'      => $marca->id,
+        ]);
+
+        $producto->delete();
+
+        $response = $this->actingAs($this->admin)
+            ->postJson('/api/ventas/contado', [
+                'medio_pago' => 'EFECTIVO',
+                'items'      => [
+                    ['producto_id' => $producto->id, 'cantidad' => 1],
+                ],
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['items.0.producto_id']);
+    }
 }
