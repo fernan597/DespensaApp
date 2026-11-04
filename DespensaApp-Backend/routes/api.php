@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertaStockController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\MovimientoCajaController;
@@ -45,6 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('role:admin_despensa')->group(function () {
+        // [CU06] Actualización individual y masiva de precios y márgenes
+        Route::put('/products/precios', [ProductController::class, 'updatePrecios']);
+
         Route::post('/products', [ProductController::class, 'store']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
@@ -73,11 +77,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/pagos-proveedores', [PagoProveedorController::class, 'store']);
     });
 
-    Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
+    Route::middleware('role:admin_despensa,empleado')->group(function () {
         // --- Catálogo (lectura requerida para POS y gestión) ---
         Route::get('/products',   [ProductController::class, 'index']);
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::get('/marcas',     [MarcaController::class, 'index']);
+
+        // --- Alertas de Stock Mínimo (CU17) ---
+        Route::get('/alertas/stock-minimo', [AlertaStockController::class, 'index']);
 
         // --- Caja ---
         Route::get('/caja/estado',       [CajaController::class, 'estado']);

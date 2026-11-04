@@ -29,7 +29,7 @@ class StorePagoProveedorRequest extends FormRequest
                 Rule::exists('proveedores', 'id')->whereNull('deleted_at'),
             ],
             'monto'        => 'required|numeric|gt:0|decimal:0,2',
-            'medio_pago'   => 'required|string|in:EFECTIVO,TRANSFERENCIA,DEBITO, CREDITO',
+            'medio_pago'   => 'required|string|in:EFECTIVO,TRANSFERENCIA,DEBITO',
         ];
     }
 

@@ -43,6 +43,13 @@ class MarcaController extends Controller
                     'message' => 'Marca no encontrada'
                 ], 404);
             }
+
+            if ($marca->products()->exists()) {
+                return response()->json([
+                    'message' => 'No se puede eliminar la marca porque tiene productos activos asociados.'
+                ], 409);
+            }
+
             $marca->delete();
             return response()->json([
                 'message' => 'Marca eliminada exitosamente',

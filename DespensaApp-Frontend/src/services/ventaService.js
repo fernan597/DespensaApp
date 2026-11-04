@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { notifyStockUpdated } from "./alertaStockService";
 
 /**
  * Registra una venta de contado.
@@ -12,6 +13,7 @@ export async function registrarVentaContado(payload) {
         method: "POST",
         body: JSON.stringify(payload),
     });
+    notifyStockUpdated();
     return data;
 }
 
@@ -27,6 +29,7 @@ export async function registrarVentaCredito(payload) {
         method: "POST",
         body: JSON.stringify(payload),
     });
+    notifyStockUpdated();
     return data;
 }
 

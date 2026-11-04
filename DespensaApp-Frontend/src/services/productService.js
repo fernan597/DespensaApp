@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { notifyStockUpdated } from "./alertaStockService";
 
 export async function getProducts() {
     try {
@@ -16,6 +17,7 @@ export async function createProduct(productData) {
             method: "POST",
             body: JSON.stringify(productData),
         });
+        notifyStockUpdated();
         return response.product;
     } catch (error) {
         console.error("Error al crear producto:", error);
@@ -29,6 +31,7 @@ export async function updateProduct(id, productData) {
             method: "PUT",
             body: JSON.stringify(productData),
         });
+        notifyStockUpdated();
         return response.product;
     } catch (error) {
         console.error("Error al actualizar producto:", error);
@@ -41,9 +44,26 @@ export async function deleteProduct(id) {
         const response = await apiFetch(`/products/${id}`, {
             method: "DELETE",
         })
+        notifyStockUpdated();
         return response;
     } catch (error) {
         console.error("Error al eliminar producto:", error);
+        throw error;
+    }
+}
+
+/**
+ * [CU06] Actualiza precios y márgenes de forma individual o masiva (por categoría/marca).
+ */
+export async function updateProductPrices(payload) {
+    try {
+        const response = await apiFetch("/products/precios", {
+            method: "PUT",
+            body: JSON.stringify(payload),
+        });
+        return response;
+    } catch (error) {
+        console.error("Error al actualizar precios:", error);
         throw error;
     }
 }

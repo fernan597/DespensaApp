@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Caja;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -44,7 +45,7 @@ class UserController extends Controller
 
     }
 
-    public function destroy($id){
+    public function destroy(Request $request, $id){
         try{
             $user = User::find($id);
             if(!$user){
@@ -54,7 +55,23 @@ class UserController extends Controller
                 ], 404);
             }
 
+            if ($request->user() && $request->user()->id === $user->id) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'No puede eliminar su propio usuario en sesión.'
+                ], 409);
+            }
+
+            if (Caja::abierta()->where('usuario_apertura_id', $user->id)->exists()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'No se puede eliminar el usuario porque tiene una caja abierta actualmente.'
+                ], 409);
+            }
+
+            $user->tokens()->delete();
             $user->delete();
+
             return response()->json([
                 'ok' => true,
                 'message' => 'Usuario eliminado correctamente.'

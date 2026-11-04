@@ -3,12 +3,15 @@ import { useProducts } from "../features/products/hooks/useProducts";
 import { ProductTable } from "../features/products/components/ProductTable";
 import { ProductFormModal } from "../features/products/components/ProductFormModal";
 import { QuickCategoryModal } from "../features/products/components/QuickCategoryModal";
+import { QuickPriceModal } from "../features/products/components/QuickPriceModal";
 import { SearchBar } from "../components/ui/SearchBar";
+import { Toast } from "../components/feedback/Toast";
 import { useBarcodeScanner } from "../hooks/useBarcodeScanner";
 
 export function AdminProducts() {
     const {
         products,
+        rawProducts,
         loading,
         search,
         setSearch,
@@ -22,7 +25,10 @@ export function AdminProducts() {
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+    const [pricingProduct, setPricingProduct] = useState(null);
     const [scannedBarcode, setScannedBarcode] = useState("");
+    const [toastMessage, setToastMessage] = useState(null);
 
     const searchInputRef = useRef(null);
 
@@ -51,6 +57,11 @@ export function AdminProducts() {
         setIsProductModalOpen(true);
     };
 
+    const handleOpenQuickPrice = (product = null) => {
+        setPricingProduct(product);
+        setIsPriceModalOpen(true);
+    };
+
     return (
         <div className="bg-surface text-on-surface min-h-screen p-6 font-body-md">
             <div className="max-w-6xl mx-auto flex flex-col gap-6">
@@ -64,7 +75,16 @@ export function AdminProducts() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <button
+                            type="button"
+                            onClick={() => handleOpenQuickPrice(null)}
+                            className="flex items-center justify-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-2.5 rounded-full font-label-md hover:opacity-90 transition-all shadow-sm active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">price_change</span>
+                            Actualizar Precios / Márgenes
+                        </button>
+
                         <button
                             type="button"
                             onClick={() => setIsCategoryModalOpen(true)}
@@ -107,9 +127,26 @@ export function AdminProducts() {
                     products={products}
                     loading={loading}
                     onEdit={handleOpenEditModal}
+                    onQuickPrice={handleOpenQuickPrice}
                     onDelete={removeProduct}
                 />
             </div>
+
+            {/* Modal CU06: Actualizar Precios y Márgenes (Individual o Masivo) */}
+            <QuickPriceModal
+                isOpen={isPriceModalOpen}
+                onClose={() => setIsPriceModalOpen(false)}
+                selectedProduct={pricingProduct}
+                products={rawProducts}
+                categories={categories}
+                marcas={marcas}
+                onSuccess={(response) => {
+                    fetchProducts();
+                    setToastMessage(
+                        response?.message || "Precios actualizados correctamente."
+                    );
+                }}
+            />
 
             {/* Modal para Crear / Editar Producto */}
             <ProductFormModal
@@ -134,6 +171,8 @@ export function AdminProducts() {
                     fetchMetadata();
                 }}
             />
+
+            <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
         </div>
     );
 }

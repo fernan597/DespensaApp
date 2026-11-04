@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useRole } from "../hooks/useRole";
+import { StockAlertWidget } from "../features/products/components/StockAlertWidget";
 
 /**
  * Ítem de navegación del sidebar.
@@ -94,8 +95,11 @@ export function MainLayout() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-xl">
-                        <div className="flex items-center gap-md pl-md">
+                    <div className="flex items-center gap-md">
+                        {/* [CU17] Widget / Badge de Alertas de Stock Mínimo */}
+                        <StockAlertWidget />
+
+                        <div className="flex items-center gap-md pl-md border-l border-outline-variant/30">
                             <div className="text-right hidden sm:block">
                                 <p className="font-label-md text-label-md text-on-surface font-semibold">
                                     {user?.name || "Administrador"}
