@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: despensaapp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: DespensaApp-database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d DespensaApp-database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: despensaapp-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8080"
+    environment:
+      PORT: 8080
+      APP_NAME: DespensaApp
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:TZs8m9kfNTK82P0IhpUCvY3odLBgL+LzHukeC/AWCXw=
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: DespensaApp-database
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-1234}
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      RUN_MIGRATIONS: "true"
+      RUN_ADMIN_SEEDER: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+

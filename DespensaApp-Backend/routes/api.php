@@ -16,6 +16,7 @@ use App\Http\Controllers\CobroClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaCorrienteProveedorController;
 use App\Http\Controllers\PagoProveedorController;
+use App\Http\Controllers\ReporteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -105,6 +106,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/cc-clientes',     [CuentaCorrienteClienteController::class, 'index']);
         Route::get('/cc-clientes/{id}', [CuentaCorrienteClienteController::class, 'show']);
         Route::post('/cobros-clientes', [CobroClienteController::class, 'store']);
+
+        // --- Reportes y Estadísticas (CU18) ---
+        Route::get('/reportes/ventas',       [ReporteController::class, 'ventas']);
+        Route::get('/reportes/mas-vendidos', [ReporteController::class, 'masVendidos']);
     });
 
 });
