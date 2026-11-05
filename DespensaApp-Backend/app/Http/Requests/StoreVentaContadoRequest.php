@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class StoreVentaContadoRequest extends BaseVentaRequest
 {
     /**
@@ -12,7 +14,10 @@ class StoreVentaContadoRequest extends BaseVentaRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'cliente_id' => 'nullable|exists:clientes,id',
+            'cliente_id' => [
+                'nullable',
+                Rule::exists('clientes', 'id')->whereNull('deleted_at'),
+            ],
             'medio_pago' => 'required|in:EFECTIVO,TRANSFERENCIA,DEBITO,CREDITO',
         ]);
     }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { InputField } from "../../../components/ui/InputField";
 import { createProduct, updateProduct } from "../../../services/productService";
+import { calcularMargen, calcularPrecioVenta } from "../../../utils/pricing";
 
 const initialForm = {
     name: "",
@@ -9,6 +10,7 @@ const initialForm = {
     stock_actual: "",
     stock_minimo: "",
     precio_compra: "",
+    margen_porcentaje: "",
     precio_venta: "",
     categoria_id: "",
     marca_nombre: "",
@@ -36,12 +38,17 @@ export function ProductFormModal({
         if (!isOpen) return;
 
         if (editingProduct) {
+            const compra = Number(editingProduct.precio_compra) || 0;
+            const venta = Number(editingProduct.precio_venta) || 0;
+            const margenCalc = compra > 0 ? calcularMargen(compra, venta) : "";
+
             setFormData({
                 name: editingProduct.nombre || "",
                 codigo_barra: editingProduct.codigo_barra || "",
                 stock_actual: editingProduct.stock_actual ?? "",
                 stock_minimo: editingProduct.stock_minimo ?? "",
                 precio_compra: editingProduct.precio_compra ?? "",
+                margen_porcentaje: margenCalc,
                 precio_venta: editingProduct.precio_venta ?? "",
                 categoria_id: editingProduct.categoria_id ?? editingProduct.categoria?.id ?? (categories[0]?.id || ""),
                 marca_nombre: editingProduct.marca?.nombre || "",
@@ -188,17 +195,55 @@ export function ProductFormModal({
                     </div>
                 </div>
 
-                {/* Precios (Compra y Venta) en grid */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Precios (Compra, Margen % y Venta) con cálculo dinámico [CU06] */}
+                <div className="grid grid-cols-3 gap-3">
                     <InputField
                         label="Precio Compra ($)"
                         type="number"
                         step="0.01"
                         required
                         value={formData.precio_compra}
-                        onChange={(e) => setFormData({ ...formData, precio_compra: e.target.value })}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            const compraNum = parseFloat(val);
+                            const margenNum = parseFloat(formData.margen_porcentaje);
+                            let nextVenta = formData.precio_venta;
+                            if (!isNaN(compraNum) && compraNum >= 0 && !isNaN(margenNum)) {
+                                nextVenta = calcularPrecioVenta(compraNum, margenNum);
+                            }
+                            setFormData({
+                                ...formData,
+                                precio_compra: val,
+                                precio_venta: nextVenta,
+                            });
+                        }}
                         placeholder="0.00"
                         error={errors.precio_compra?.[0]}
+                    />
+
+                    <InputField
+                        label="Margen (%)"
+                        type="number"
+                        step="0.01"
+                        value={formData.margen_porcentaje}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            const compraNum = parseFloat(formData.precio_compra);
+                            const margenNum = parseFloat(val);
+                            let nextVenta = formData.precio_venta;
+                            if (!isNaN(compraNum) && compraNum > 0 && !isNaN(margenNum)) {
+                                nextVenta = Math.max(
+                                    0.01,
+                                    Number(calcularPrecioVenta(compraNum, margenNum))
+                                ).toFixed(2);
+                            }
+                            setFormData({
+                                ...formData,
+                                margen_porcentaje: val,
+                                precio_venta: nextVenta,
+                            });
+                        }}
+                        placeholder="Ej: 30"
                     />
 
                     <InputField
@@ -207,7 +252,20 @@ export function ProductFormModal({
                         step="0.01"
                         required
                         value={formData.precio_venta}
-                        onChange={(e) => setFormData({ ...formData, precio_venta: e.target.value })}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            const compraNum = parseFloat(formData.precio_compra);
+                            const ventaNum = parseFloat(val);
+                            let nextMargen = formData.margen_porcentaje;
+                            if (!isNaN(compraNum) && compraNum > 0 && !isNaN(ventaNum)) {
+                                nextMargen = String(calcularMargen(compraNum, ventaNum));
+                            }
+                            setFormData({
+                                ...formData,
+                                precio_venta: val,
+                                margen_porcentaje: nextMargen,
+                            });
+                        }}
                         placeholder="0.00"
                         error={errors.precio_venta?.[0]}
                     />

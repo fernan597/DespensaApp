@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\StockInsuficienteException;
-use App\Models\AlertaStock;
 use App\Models\DetalleVenta;
 use App\Models\Product;
 use App\Models\Venta;
@@ -16,8 +15,13 @@ use App\Models\Venta;
  */
 class VentaService
 {
+    public function __construct(
+        protected AlertaStockService $alertaStockService
+    ) {}
+
     /**
-     * Bloquea los productos solicitados, valida stock suficiente y calcula el total.
+     * Bloquea los productos solicitados en orden ascendente de ID (previene deadlocks),
+     * valida stock suficiente y calcula el total.
      *
      * @param  array  $items  [['producto_id' => int, 'cantidad' => int], ...]
      * @return array{productos: array<int, array{modelo: Product, cantidad: int}>, total: float}
@@ -26,11 +30,21 @@ class VentaService
      */
     public function prepararItems(array $items): array
     {
+        $productIds = collect($items)->pluck('producto_id')->unique()->sort()->values()->all();
+        $productosDb = Product::whereIn('id', $productIds)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
         $productos = [];
-        $total     = 0;
+        $total     = '0.00';
 
         foreach ($items as $item) {
-            $producto = Product::lockForUpdate()->findOrFail($item['producto_id']);
+            /** @var Product|null $producto */
+            $producto = $productosDb->get($item['producto_id'])
+                ?? Product::lockForUpdate()->findOrFail($item['producto_id']);
+
             $cantidad = (int) $item['cantidad'];
 
             if ($producto->stock_actual < $cantidad) {
@@ -45,12 +59,13 @@ class VentaService
                 'cantidad' => $cantidad,
             ];
 
-            $total += $producto->precio_venta * $cantidad;
+            $subtotalItem = bcmul((string) $producto->precio_venta, (string) $cantidad, 2);
+            $total        = bcadd($total, $subtotalItem, 2);
         }
 
         return [
             'productos' => $productos,
-            'total'     => round($total, 2),
+            'total'     => (float) $total,
         ];
     }
 
@@ -69,27 +84,23 @@ class VentaService
             $producto = $item['modelo'];
             $cantidad = $item['cantidad'];
 
+            $subtotal = (float) bcmul((string) $producto->precio_venta, (string) $cantidad, 2);
+
             // Detalle con precio tomado de la BD, nunca del request
             DetalleVenta::create([
                 'venta_id'        => $venta->id,
                 'product_id'      => $producto->id,
                 'cantidad'        => $cantidad,
                 'precio_unitario' => $producto->precio_venta,
-                'subtotal'        => round($producto->precio_venta * $cantidad, 2),
+                'subtotal'        => $subtotal,
             ]);
 
             // Descontar stock
             $producto->decrement('stock_actual', $cantidad);
             $producto->refresh();
 
-            // Alerta de stock mínimo
-            if ($producto->stock_actual <= $producto->stock_minimo) {
-                AlertaStock::create([
-                    'product_id' => $producto->id,
-                    'mensaje'    => "Stock bajo: '{$producto->nombre}' tiene {$producto->stock_actual} unidad(es) disponible(s).",
-                    'atendida'   => false,
-                ]);
-            }
+            // Bitácora de alertas de stock mínimo
+            $this->alertaStockService->sincronizarProducto($producto);
         }
 
         return $venta;

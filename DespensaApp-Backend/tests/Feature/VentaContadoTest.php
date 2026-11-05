@@ -528,11 +528,10 @@ class VentaContadoTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_admin_despensa_y_admin_pueden_registrar_venta_contado(): void
+    public function test_admin_despensa_puede_registrar_venta_contado(): void
     {
-        $caja = $this->abrirCaja();
+        $this->abrirCaja();
 
-        // Rol admin_despensa
         $adminDespensa = User::factory()->create(['role' => 'admin_despensa']);
         Sanctum::actingAs($adminDespensa);
 
@@ -546,15 +545,28 @@ class VentaContadoTest extends TestCase
             ],
         ];
 
-        $responseAdminDespensa = $this->postJson('/api/ventas/contado', $payload);
-        $responseAdminDespensa->assertStatus(201);
+        $this->postJson('/api/ventas/contado', $payload)->assertStatus(201);
+    }
 
-        // Rol admin
+    public function test_admin_plataforma_no_puede_registrar_venta_contado(): void
+    {
+        $this->abrirCaja();
+
         $admin = User::factory()->create(['role' => 'admin']);
         Sanctum::actingAs($admin);
 
-        $responseAdmin = $this->postJson('/api/ventas/contado', $payload);
-        $responseAdmin->assertStatus(201);
+        $payload = [
+            'medio_pago' => 'EFECTIVO',
+            'items'      => [
+                [
+                    'producto_id' => $this->productoA->id,
+                    'cantidad'    => 1,
+                ],
+            ],
+        ];
+
+        $this->postJson('/api/ventas/contado', $payload)->assertForbidden();
+        $this->assertDatabaseCount('ventas', 0);
     }
 
     public function test_error_inesperado_retorna_status_500_y_no_persiste_datos(): void

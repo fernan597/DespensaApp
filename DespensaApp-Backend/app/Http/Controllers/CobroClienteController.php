@@ -23,21 +23,17 @@ class CobroClienteController extends Controller
     public function store(StoreCobroClienteRequest $request): JsonResponse
     {
         // 1. Si el medio de pago es efectivo, la caja debe estar abierta obligatoriamente
-        $caja = null;
-        if ($request->medio_pago === 'EFECTIVO') {
-            $caja = Caja::abierta()->first();
-            if (!$caja) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No hay una caja abierta para registrar el cobro en efectivo. Debe abrir una caja primero.',
-                ], 422);
-            }
+        if ($request->medio_pago === 'EFECTIVO' && ! Caja::abierta()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay una caja abierta para registrar el cobro en efectivo. Debe abrir una caja primero.',
+            ], 422);
         }
 
         try {
-            return DB::transaction(function () use ($request, $caja) {
-                // 2. Bloquear fila del cliente para prevenir condiciones de carrera
-                /** @var Cliente $cliente */
+            return DB::transaction(function () use ($request) {
+                // 2. Bloquear fila del cliente para prevenir condiciones de carrera (orden consistente: Cliente -> Caja)
+                /** @var Cliente|null $cliente */
                 $cliente = Cliente::lockForUpdate()->find($request->cliente_id);
 
                 if (!$cliente) {
@@ -47,51 +43,66 @@ class CobroClienteController extends Controller
                     ], 404);
                 }
 
-                $saldoActual = (float) $cliente->saldo_cuenta_corriente;
+                $saldoActualDecimal = number_format((float) $cliente->saldo_cuenta_corriente, 2, '.', '');
+                $saldoActual        = (float) $cliente->saldo_cuenta_corriente;
 
-                // 3. Validar que el cliente tenga saldo deudor
-                if ($saldoActual <= 0) {
+                // 3. Validar que el cliente tenga saldo deudor con precisión decimal (BCMath)
+                if (bccomp($saldoActualDecimal, '0.00', 2) <= 0) {
                     return response()->json([
                         'success' => false,
                         'message' => "El cliente '{$cliente->nombre} {$cliente->apellido}' no registra saldo adeudado pendiente de cobro.",
                     ], 422);
                 }
 
-                $monto = round((float) $request->monto, 2);
+                $montoDecimal = number_format((float) $request->monto, 2, '.', '');
+                $monto        = round((float) $request->monto, 2);
 
-                // 4. Validar que el monto no exceda la deuda acumulada
-                if ($monto > $saldoActual) {
+                // 4. Validar que el monto no exceda la deuda acumulada con precisión decimal (BCMath)
+                if (bccomp($montoDecimal, $saldoActualDecimal, 2) === 1) {
                     return response()->json([
                         'success' => false,
                         'message' => "El monto a cobrar ($ {$monto}) no puede superar el saldo pendiente actual ($ {$saldoActual}).",
                     ], 422);
                 }
 
-                // 5. Crear cabecera del CobroCliente
+                // 5. Si el medio de pago es efectivo, bloquear la caja activa dentro de la transacción
+                $caja = null;
+                if ($request->medio_pago === 'EFECTIVO') {
+                    $caja = Caja::lockForUpdate()->abierta()->first();
+                    if (!$caja) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'No hay una caja abierta para registrar el cobro en efectivo. Debe abrir una caja primero.',
+                        ], 422);
+                    }
+                }
+
+                // 6. Crear cabecera del CobroCliente
                 $cobro = CobroCliente::create([
                     'cliente_id' => $cliente->id,
                     'user_id'    => $request->user()->id,
-                    'monto'      => $monto,
+                    'monto'      => $montoDecimal,
                     'medio_pago' => $request->medio_pago,
                 ]);
 
-                // 6. Registrar movimiento contable en la Cuenta Corriente (CRÉDITO que descuenta deuda)
+                // 7. Registrar movimiento contable en la Cuenta Corriente (CRÉDITO que descuenta deuda)
                 MovimientoCuentaCorrienteCliente::create([
                     'cliente_id'       => $cliente->id,
-                    'monto'            => $monto,
+                    'monto'            => $montoDecimal,
                     'tipo_movimiento'  => 'CREDITO',
                     'cobro_cliente_id' => $cobro->id,
                 ]);
 
-                // 7. Actualizar el saldo pendiente del cliente
-                $cliente->decrement('saldo_cuenta_corriente', $monto);
+                // 8. Actualizar el saldo pendiente del cliente con precisión decimal (BCMath)
+                $nuevoSaldo = bcsub($saldoActualDecimal, $montoDecimal, 2);
+                $cliente->update(['saldo_cuenta_corriente' => $nuevoSaldo]);
                 $cliente->refresh();
 
-                // 8. Si es en efectivo, registrar ingreso en la caja activa del turno
+                // 9. Si es en efectivo, registrar ingreso en la caja activa del turno
                 if ($request->medio_pago === 'EFECTIVO' && $caja) {
                     MovimientoCaja::create([
                         'caja_id'          => $caja->id,
-                        'monto'            => $monto,
+                        'monto'            => $montoDecimal,
                         'tipo'             => 'INGRESO_COBRO_CLIENTE',
                         'concepto'         => "Cobro a cliente #{$cobro->id} ({$cliente->nombre} {$cliente->apellido})",
                         'cobro_cliente_id' => $cobro->id,

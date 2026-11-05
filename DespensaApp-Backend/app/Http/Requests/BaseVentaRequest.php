@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 abstract class BaseVentaRequest extends FormRequest
 {
@@ -23,7 +24,11 @@ abstract class BaseVentaRequest extends FormRequest
     {
         return [
             'items'               => 'required|array|min:1',
-            'items.*.producto_id' => 'required|exists:products,id|distinct',
+            'items.*.producto_id' => [
+                'required',
+                'distinct',
+                Rule::exists('products', 'id')->whereNull('deleted_at'),
+            ],
             'items.*.cantidad'    => 'required|integer|min:1',
         ];
     }

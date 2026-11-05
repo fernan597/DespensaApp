@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: despensaapp-backend
+    runtime: docker
+    rootDir: DespensaApp-Backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: DespensaApp
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: SESSION_DRIVER
+        value: array
+      - key: CACHE_STORE
+        value: file
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: despensaapp-db
+          property: connectionString
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_ADMIN_SEEDER
+        value: "true"
+
+databases:
+  - name: despensaapp-db
+    databaseName: despensaapp
+    user: despensaapp_user
+    plan: free
+

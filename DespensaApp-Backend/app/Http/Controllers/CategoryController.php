@@ -47,6 +47,13 @@ class CategoryController extends Controller
                 ], 404);
             }
 
+            if ($category->products()->exists()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'No se puede eliminar la categoría porque tiene productos activos asociados.'
+                ], 409);
+            }
+
             $category->delete();
             return response()->json([
                 'ok' => true,

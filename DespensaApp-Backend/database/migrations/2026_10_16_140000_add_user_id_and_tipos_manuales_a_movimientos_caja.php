@@ -22,8 +22,9 @@ return new class extends Migration
             }
         });
 
-        // Modificar columna tipo para soportar INGRESO_MANUAL y EGRESO_MANUAL si el motor es MySQL
-        if (DB::getDriverName() === 'mysql') {
+        // Modificar columna tipo para soportar INGRESO_MANUAL y EGRESO_MANUAL según el motor (MySQL / PostgreSQL)
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE movimientos_caja MODIFY COLUMN tipo ENUM(
                 'INGRESO_VENTA',
                 'INGRESO_COBRO_CLIENTE',
@@ -33,6 +34,17 @@ return new class extends Migration
                 'INGRESO_MANUAL',
                 'EGRESO_MANUAL'
             ) NOT NULL");
+        } elseif ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE movimientos_caja DROP CONSTRAINT IF EXISTS movimientos_caja_tipo_check');
+            DB::statement("ALTER TABLE movimientos_caja ADD CONSTRAINT movimientos_caja_tipo_check CHECK (tipo::text = ANY (ARRAY[
+                'INGRESO_VENTA'::character varying,
+                'INGRESO_COBRO_CLIENTE'::character varying,
+                'EGRESO_PAGO_PROVEEDOR'::character varying,
+                'EGRESO_GASTO_VARIOS'::character varying,
+                'AJUSTE_MANUAL'::character varying,
+                'INGRESO_MANUAL'::character varying,
+                'EGRESO_MANUAL'::character varying
+            ]::text[]))");
         }
     }
 
@@ -41,7 +53,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (DB::getDriverName() === 'mysql') {
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE movimientos_caja MODIFY COLUMN tipo ENUM(
                 'INGRESO_VENTA',
                 'INGRESO_COBRO_CLIENTE',
@@ -49,6 +62,15 @@ return new class extends Migration
                 'EGRESO_GASTO_VARIOS',
                 'AJUSTE_MANUAL'
             ) NOT NULL");
+        } elseif ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE movimientos_caja DROP CONSTRAINT IF EXISTS movimientos_caja_tipo_check');
+            DB::statement("ALTER TABLE movimientos_caja ADD CONSTRAINT movimientos_caja_tipo_check CHECK (tipo::text = ANY (ARRAY[
+                'INGRESO_VENTA'::character varying,
+                'INGRESO_COBRO_CLIENTE'::character varying,
+                'EGRESO_PAGO_PROVEEDOR'::character varying,
+                'EGRESO_GASTO_VARIOS'::character varying,
+                'AJUSTE_MANUAL'::character varying
+            ]::text[]))");
         }
 
         Schema::table('movimientos_caja', function (Blueprint $table) {

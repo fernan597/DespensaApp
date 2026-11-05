@@ -29,6 +29,9 @@ export function useRole() {
         /** Puede gestionar productos y stock */
         canManageProducts: role === "admin_despensa",
 
+        /** Puede ver alertas y stock del comercio */
+        canViewStockAlerts: role === "admin_despensa" || role === "empleado",
+
         /** Puede gestionar usuarios */
         canManageUsers: role === "admin",
 

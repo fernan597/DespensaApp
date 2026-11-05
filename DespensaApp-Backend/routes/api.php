@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertaStockController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\MovimientoCajaController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\CobroClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaCorrienteProveedorController;
 use App\Http\Controllers\PagoProveedorController;
+use App\Http\Controllers\ReporteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('role:admin_despensa')->group(function () {
+        // [CU06] Actualización individual y masiva de precios y márgenes
+        Route::put('/products/precios', [ProductController::class, 'updatePrecios']);
+
         Route::post('/products', [ProductController::class, 'store']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
@@ -73,11 +78,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/pagos-proveedores', [PagoProveedorController::class, 'store']);
     });
 
-    Route::middleware('role:admin,admin_despensa,empleado')->group(function () {
+    Route::middleware('role:admin_despensa,empleado')->group(function () {
         // --- Catálogo (lectura requerida para POS y gestión) ---
         Route::get('/products',   [ProductController::class, 'index']);
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::get('/marcas',     [MarcaController::class, 'index']);
+
+        // --- Alertas de Stock Mínimo (CU17) ---
+        Route::get('/alertas/stock-minimo', [AlertaStockController::class, 'index']);
 
         // --- Caja ---
         Route::get('/caja/estado',       [CajaController::class, 'estado']);
@@ -98,6 +106,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/cc-clientes',     [CuentaCorrienteClienteController::class, 'index']);
         Route::get('/cc-clientes/{id}', [CuentaCorrienteClienteController::class, 'show']);
         Route::post('/cobros-clientes', [CobroClienteController::class, 'store']);
+
+        // --- Reportes y Estadísticas (CU18) ---
+        Route::get('/reportes/ventas',       [ReporteController::class, 'ventas']);
+        Route::get('/reportes/mas-vendidos', [ReporteController::class, 'masVendidos']);
     });
 
 });

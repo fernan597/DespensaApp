@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { notifyStockUpdated } from "./alertaStockService";
 
 /**
  * Registra una compra de mercadería a un proveedor.
@@ -18,5 +19,6 @@ export async function registrarCompra(payload) {
         method: "POST",
         body: JSON.stringify(payload),
     });
+    notifyStockUpdated();
     return data;
 }

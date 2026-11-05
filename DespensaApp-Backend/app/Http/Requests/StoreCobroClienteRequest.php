@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCobroClienteRequest extends FormRequest
 {
@@ -22,7 +23,11 @@ class StoreCobroClienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cliente_id' => 'required|integer|exists:clientes,id',
+            'cliente_id' => [
+                'required',
+                'integer',
+                Rule::exists('clientes', 'id')->whereNull('deleted_at'),
+            ],
             'monto'      => 'required|numeric|gt:0',
             'medio_pago' => 'required|string|in:EFECTIVO,TRANSFERENCIA,DEBITO,CREDITO',
         ];

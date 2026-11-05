@@ -11,6 +11,7 @@ use App\Models\MovimientoCaja;
 use App\Models\MovimientoCuentaCorrienteProveedor;
 use App\Models\Product;
 use App\Models\Proveedor;
+use App\Services\AlertaStockService;
 use DomainException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -35,13 +36,13 @@ class CompraController extends Controller
      *  7. Si es CRÉDITO / CUENTA_CORRIENTE: genera un MovimientoCuentaCorrienteProveedor (DEBITO)
      *     e incrementa el saldo_adeudado del proveedor.
      */
-    public function store(StoreCompraRequest $request): JsonResponse
+    public function store(StoreCompraRequest $request, AlertaStockService $alertaStockService): JsonResponse
     {
         $tipoPagoInput = strtoupper($request->tipo_pago);
         $esContado = ($tipoPagoInput === 'CONTADO');
 
         try {
-            $compra = DB::transaction(function () use ($request, $esContado) {
+            $compra = DB::transaction(function () use ($request, $esContado, $alertaStockService) {
                 // 1. Si es pago contado, verificar y bloquear la caja abierta dentro de la transacción
                 $caja = null;
                 if ($esContado) {
@@ -131,6 +132,9 @@ class CompraController extends Controller
                     $producto->increment('stock_actual', $cantidad, [
                         'precio_compra' => $costoUnitario,
                     ]);
+
+                    $producto->refresh();
+                    $alertaStockService->sincronizarProducto($producto);
                 }
 
                 // 6. Manejo según tipo de pago

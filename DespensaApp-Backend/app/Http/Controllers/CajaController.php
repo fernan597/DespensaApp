@@ -9,6 +9,7 @@ use App\Http\Resources\CajaResumenResource;
 use App\Models\Caja;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CajaController extends Controller
 {
@@ -47,28 +48,29 @@ class CajaController extends Controller
      */
     public function abrir(AbrirCajaRequest $request): JsonResponse
     {
-        // Verificar si ya existe una caja abierta (sin guardar en variable,
-        // ya que no necesitamos su ID en la respuesta de error, solo el hecho)
-        if (Caja::abierta()->exists()) {
-            return response()->json([
-                'message' => 'Ya existe una caja abierta. Ciérrela antes de abrir una nueva.',
-            ], 400);
-        }
-
         try {
-            $caja = Caja::create([
-                'usuario_apertura_id' => $request->user()->id,
-                'saldo_inicial'       => $request->saldo_inicial,
-                'fecha_apertura'      => now(),
-                'estado'              => 'ABIERTA',
-            ]);
+            return DB::transaction(function () use ($request) {
+                // Verificar y bloquear si ya existe una caja abierta para prevenir doble apertura simultánea
+                if (Caja::lockForUpdate()->abierta()->exists()) {
+                    return response()->json([
+                        'message' => 'Ya existe una caja abierta. Ciérrela antes de abrir una nueva.',
+                    ], 400);
+                }
 
-            $caja->load('usuarioApertura:id,name');
+                $caja = Caja::create([
+                    'usuario_apertura_id' => $request->user()->id,
+                    'saldo_inicial'       => $request->saldo_inicial,
+                    'fecha_apertura'      => now(),
+                    'estado'              => 'ABIERTA',
+                ]);
 
-            return response()->json([
-                'message' => 'Caja abierta correctamente.',
-                'caja'    => new CajaResource($caja),
-            ], 201);
+                $caja->load('usuarioApertura:id,name');
+
+                return response()->json([
+                    'message' => 'Caja abierta correctamente.',
+                    'caja'    => new CajaResource($caja),
+                ], 201);
+            });
 
         } catch (\Exception $e) {
             return response()->json([
@@ -88,43 +90,45 @@ class CajaController extends Controller
      */
     public function cerrar(CerrarCajaRequest $request): JsonResponse
     {
-        $caja = Caja::abierta()->first();
+        return DB::transaction(function () use ($request) {
+            $caja = Caja::lockForUpdate()->abierta()->first();
 
-        if (! $caja) {
+            if (! $caja) {
+                return response()->json([
+                    'message' => 'No hay ninguna caja abierta para cerrar.',
+                ], 404);
+            }
+
+            $totalIngresos = $caja->totalIngresos();   // string "1350.25"
+            $totalEgresos  = $caja->totalEgresos();
+            $saldoEsperado = $caja->saldoEsperado();
+            $saldoFinal    = bcadd((string) $request->validated('saldo_final'), '0', 2);
+            $diferencia    = bcsub($saldoFinal, $saldoEsperado, 2);
+
+            $caja->update([
+                'usuario_cierre_id' => $request->user()->id,
+                'fecha_cierre'      => now(),
+                'saldo_final'       => $saldoFinal,
+                'estado'            => 'CERRADA',
+            ]);
+
+            $caja->load('usuarioCierre:id,name');
+
+            // (float) solo al armar el JSON: los cálculos ya terminaron.
+            $resumen = [
+                'saldo_inicial'         => (float) $caja->saldo_inicial,
+                'total_ingresos'        => (float) $totalIngresos,
+                'total_egresos'         => (float) $totalEgresos,
+                'saldo_esperado'        => (float) $saldoEsperado,
+                'saldo_final_declarado' => (float) $saldoFinal,
+                'diferencia'            => (float) $diferencia,
+            ];
+
             return response()->json([
-                'message' => 'No hay ninguna caja abierta para cerrar.',
-            ], 404);
-        }
-
-        $totalIngresos = $caja->totalIngresos();   // string "1350.25"
-$totalEgresos  = $caja->totalEgresos();
-$saldoEsperado = $caja->saldoEsperado();
-$saldoFinal    = bcadd((string) $request->validated('saldo_final'), '0', 2);
-$diferencia    = bcsub($saldoFinal, $saldoEsperado, 2);
-
-$caja->update([
-    'usuario_cierre_id' => $request->user()->id,
-    'fecha_cierre'      => now(),
-    'saldo_final'       => $saldoFinal,
-    'estado'            => 'CERRADA',
-]);
-
-$caja->load('usuarioCierre:id,name');
-
-// (float) solo al armar el JSON: los cálculos ya terminaron.
-$resumen = [
-    'saldo_inicial'         => (float) $caja->saldo_inicial,
-    'total_ingresos'        => (float) $totalIngresos,
-    'total_egresos'         => (float) $totalEgresos,
-    'saldo_esperado'        => (float) $saldoEsperado,
-    'saldo_final_declarado' => (float) $saldoFinal,
-    'diferencia'            => (float) $diferencia,
-];
-
-        return response()->json([
-            'message' => 'Caja cerrada correctamente.',
-            'resumen' => new CajaResumenResource($caja, $resumen),
-        ], 200);
+                'message' => 'Caja cerrada correctamente.',
+                'resumen' => new CajaResumenResource($caja, $resumen),
+            ], 200);
+        });
     }
 
     /**

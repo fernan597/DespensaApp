@@ -48,6 +48,13 @@ class ProveedorController extends Controller
 
     public function destroy(Proveedor $proveedor): JsonResponse
     {
+        if (bccomp((string) $proveedor->saldo_adeudado, '0.00', 2) === 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar el proveedor porque registra saldo adeudado pendiente de pago.'
+            ], 409);
+        }
+
         try {
             $proveedor->delete();
 

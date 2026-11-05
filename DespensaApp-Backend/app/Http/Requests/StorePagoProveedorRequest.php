@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePagoProveedorRequest extends FormRequest
 {
@@ -22,9 +23,13 @@ class StorePagoProveedorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'proveedor_id' => 'required|integer|exists:proveedores,id',
+            'proveedor_id' => [
+                'required',
+                'integer',
+                Rule::exists('proveedores', 'id')->whereNull('deleted_at'),
+            ],
             'monto'        => 'required|numeric|gt:0|decimal:0,2',
-            'medio_pago'   => 'required|string|in:EFECTIVO,TRANSFERENCIA,DEBITO, CREDITO',
+            'medio_pago'   => 'required|string|in:EFECTIVO,TRANSFERENCIA,DEBITO',
         ];
     }
 

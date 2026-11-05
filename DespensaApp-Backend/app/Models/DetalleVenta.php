@@ -37,10 +37,10 @@ class DetalleVenta extends Model
     }
 
     /**
-     * El producto referenciado en este ítem de venta.
+     * El producto referenciado en este ítem de venta (incluye dados de baja lógicamente para preservar el historial).
      */
     public function producto(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id')->withTrashed();
     }
 }
