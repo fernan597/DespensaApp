@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../services/api";
 
@@ -151,6 +151,19 @@ export function LoginForm() {
                                 {isSubmitting ? "Iniciando sesión..." : "Iniciar Sesión"}
                             </button>
                         </form>
+
+                        {/* Volver a la Landing Page */}
+                        <div className="pt-xs border-t border-outline-variant/30 text-center">
+                            <Link
+                                to="/"
+                                className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-on-surface-variant hover:text-primary transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[16px] notranslate" translate="no">
+                                    arrow_back
+                                </span>
+                                <span>Volver a la página de inicio</span>
+                            </Link>
+                        </div>
 
                     </div>
                 </div>

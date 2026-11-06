@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RoleRoute } from "./components/RoleRoute";
 import { LoginForm } from "./pages/login";
+import { LandingPage } from "./pages/LandingPage";
 import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
 import { AdminProducts } from "./pages/AdminProducts";
@@ -19,7 +20,8 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Ruta pública */}
+          {/* Rutas públicas */}
+          <Route path="/bienvenida" element={<LandingPage />} />
           <Route path="/login" element={<LoginForm />} />
 
           {/* RUTAS PROTEGIDAS CON SIDEBAR PERMANENTE */}
