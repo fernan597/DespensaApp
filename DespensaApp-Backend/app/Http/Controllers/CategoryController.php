@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Services\AuditoriaService;
 
 class CategoryController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     public function index()
     {
         $categories = Category::orderBy('nombre', 'asc')->get();
@@ -24,6 +29,11 @@ class CategoryController extends Controller
             $category = Category::create([
                 'nombre' => $validated['nombre'],
             ]);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::CREAR_CATEGORIA,
+                "Categoría #{$category->id} creada: {$category->nombre}."
+            );
 
             return response()->json([
                 'ok' => true,
@@ -55,6 +65,12 @@ class CategoryController extends Controller
             }
 
             $category->delete();
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ELIMINAR_CATEGORIA,
+                "Categoría #{$category->id} eliminada: {$category->nombre}."
+            );
+
             return response()->json([
                 'ok' => true,
                 'message' => 'Categoría eliminada correctamente.'

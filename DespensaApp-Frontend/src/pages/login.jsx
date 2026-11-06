@@ -62,7 +62,7 @@ export function LoginForm() {
                         {/* Header */}
                         <div className="text-center flex flex-col gap-sm">
                             <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mx-auto mb-sm">
-                                <span className="material-symbols-outlined text-on-primary-container text-[32px]">
+                                <span className="material-symbols-outlined text-on-primary-container text-[32px] notranslate" translate="no">
                                     eco
                                 </span>
                             </div>
@@ -84,7 +84,7 @@ export function LoginForm() {
                                     Correo Electrónico
                                 </label>
                                 <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                    <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant notranslate" translate="no">
                                         mail
                                     </span>
                                     <input
@@ -93,6 +93,9 @@ export function LoginForm() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="tu@email.com"
+                                        autoComplete="email"
+                                        autoCapitalize="none"
+                                        spellCheck="false"
                                         required
                                         className="w-full h-12 bg-surface-container rounded-lg pl-12 pr-md font-body-md text-body-md text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-colors"
                                     />
@@ -110,7 +113,7 @@ export function LoginForm() {
                                     </label>
                                 </div>
                                 <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">
+                                    <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant notranslate" translate="no">
                                         lock
                                     </span>
                                     <input
@@ -119,6 +122,7 @@ export function LoginForm() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
+                                        autoComplete="current-password"
                                         required
                                         className="w-full h-12 bg-surface-container rounded-lg pl-12 pr-md font-body-md text-body-md text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-colors"
                                     />
@@ -126,8 +130,9 @@ export function LoginForm() {
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+                                        aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                                     >
-                                        <span className="material-symbols-outlined text-[20px]">
+                                        <span className="material-symbols-outlined text-[20px] notranslate" translate="no">
                                             {showPassword ? "visibility" : "visibility_off"}
                                         </span>
                                     </button>

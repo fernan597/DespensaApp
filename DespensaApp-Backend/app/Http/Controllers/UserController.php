@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Caja;
 use App\Models\User;
+use App\Services\AuditoriaService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     public function index()
     {
         $users = User::where('role', '!=', 'admin')->get();
@@ -31,6 +36,11 @@ class UserController extends Controller
                 'password' => $validated['password'],
                 'role' => $validated['role'],
             ]);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::CREAR_USUARIO,
+                "Usuario creado #{$user->id}: {$user->name} <{$user->email}> (rol {$user->role})."
+            );
 
             return response()->json([
                 'ok' => true,
@@ -71,6 +81,11 @@ class UserController extends Controller
 
             $user->tokens()->delete();
             $user->delete();
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ELIMINAR_USUARIO,
+                "Usuario eliminado #{$user->id}: {$user->name} <{$user->email}> (rol {$user->role})."
+            );
 
             return response()->json([
                 'ok' => true,

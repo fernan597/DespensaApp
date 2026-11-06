@@ -50,6 +50,11 @@ const ROUTE_META = {
         title: "Administración de Usuarios y Roles",
         icon: "group",
     },
+    "/admin/auditoria": {
+        category: "Seguridad y Sistema",
+        title: "Logs de Auditoría",
+        icon: "policy",
+    },
 };
 
 const ROLE_LABELS = {
@@ -259,13 +264,21 @@ export function MainLayout() {
                         </>
                     )}
 
-                    {isAdmin && (
+                    {(isAdmin || isAdminDespensa) && (
                         <>
                             <SidebarSectionHeader label="Administración de Sistema" />
+                            {isAdmin && (
+                                <SidebarNavLink
+                                    to="/admin/usuarios"
+                                    icon="manage_accounts"
+                                    label="Usuarios y Accesos"
+                                    onClick={closeMobileSidebar}
+                                />
+                            )}
                             <SidebarNavLink
-                                to="/admin/usuarios"
-                                icon="manage_accounts"
-                                label="Usuarios y Accesos"
+                                to="/admin/auditoria"
+                                icon="policy"
+                                label="Logs de Auditoría"
                                 onClick={closeMobileSidebar}
                             />
                         </>

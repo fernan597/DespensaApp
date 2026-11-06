@@ -11,6 +11,7 @@ import { PuntoDeVenta } from "./pages/PuntoDeVenta";
 import { RegistrarCompra } from "./pages/RegistrarCompra";
 import { CuentaCorrienteProveedor } from "./pages/CuentaCorrienteProveedor";
 import { CuentaCorrienteCliente } from "./pages/CuentaCorrienteCliente";
+import { HistorialOperaciones } from "./pages/HistorialOperaciones";
 import { MainLayout } from "./components/MainLayout";
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
               {/* Exclusivo Admin del Sistema */}
               <Route element={<RoleRoute roles={["admin"]} />}>
                 <Route path="/admin/usuarios" element={<AdminUsers />} />
+              </Route>
+
+              {/* [CU03] Auditoría — Administrador del Sistema y del Negocio */}
+              <Route element={<RoleRoute roles={["admin", "admin_despensa"]} />}>
+                <Route path="/admin/auditoria" element={<HistorialOperaciones />} />
               </Route>
 
               {/* Exclusivo Admin Despensa — Gestión de Productos, Proveedores, Compras y Cuentas Corrientes */}
