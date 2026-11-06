@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Exceptions\CajaCerradaException;
 use App\Exceptions\FondosInsuficientesException;
 use App\Http\Requests\StoreMovimientoCajaRequest;
 use App\Http\Resources\MovimientoCajaResource;
+use App\Services\AuditoriaService;
 use App\Services\MovimientoCajaService;
 use Illuminate\Http\JsonResponse;
 use InvalidArgumentException;
@@ -14,7 +16,8 @@ use Throwable;
 class MovimientoCajaController extends Controller
 {
     public function __construct(
-        protected MovimientoCajaService $movimientoCajaService
+        protected MovimientoCajaService $movimientoCajaService,
+        protected AuditoriaService $auditoriaService
     ) {}
 
     /**
@@ -32,10 +35,17 @@ class MovimientoCajaController extends Controller
                 concepto: $request->validated('concepto')
             );
 
+            $movimiento = $resultado['movimiento'];
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::MOVIMIENTO_CAJA,
+                "Movimiento manual {$request->validated('tipo')} por $ {$movimiento->monto}. Concepto: {$request->validated('concepto')}."
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Movimiento de caja registrado exitosamente.',
-                'data'    => new MovimientoCajaResource($resultado['movimiento']),
+                'data'    => new MovimientoCajaResource($movimiento),
             ], 201);
         } catch (CajaCerradaException $e) {
             return response()->json([

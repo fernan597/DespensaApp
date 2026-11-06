@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Http\Requests\StoreCobroClienteRequest;
 use App\Http\Resources\ClienteResource;
 use App\Http\Resources\CobroClienteResource;
@@ -10,11 +11,15 @@ use App\Models\Cliente;
 use App\Models\CobroCliente;
 use App\Models\MovimientoCaja;
 use App\Models\MovimientoCuentaCorrienteCliente;
+use App\Services\AuditoriaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class CobroClienteController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     /**
      * Registra un cobro o entrega de dinero de un cliente para cancelar parte o la totalidad de su deuda (CU12).
      *
@@ -108,6 +113,11 @@ class CobroClienteController extends Controller
                         'cobro_cliente_id' => $cobro->id,
                     ]);
                 }
+
+                $this->auditoriaService->registrar(
+                    AccionAuditoria::COBRO_CLIENTE,
+                    "Cobro #{$cobro->id} a {$cliente->nombre} {$cliente->apellido} por $ {$montoDecimal} ({$request->medio_pago})."
+                );
 
                 return response()->json([
                     'success' => true,

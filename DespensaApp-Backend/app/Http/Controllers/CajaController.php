@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Http\Requests\AbrirCajaRequest;
 use App\Http\Requests\CerrarCajaRequest;
 use App\Http\Resources\CajaResource;
 use App\Http\Resources\CajaResumenResource;
 use App\Models\Caja;
+use App\Services\AuditoriaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CajaController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     /**
      * GET /api/caja/estado
      *
@@ -66,6 +71,11 @@ class CajaController extends Controller
 
                 $caja->load('usuarioApertura:id,name');
 
+                $this->auditoriaService->registrar(
+                    AccionAuditoria::ABRIR_CAJA,
+                    "Caja #{$caja->id} abierta con saldo inicial $ {$caja->saldo_inicial}."
+                );
+
                 return response()->json([
                     'message' => 'Caja abierta correctamente.',
                     'caja'    => new CajaResource($caja),
@@ -113,6 +123,11 @@ class CajaController extends Controller
             ]);
 
             $caja->load('usuarioCierre:id,name');
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::CERRAR_CAJA,
+                "Caja #{$caja->id} cerrada. Saldo final declarado $ {$saldoFinal}; saldo esperado $ {$saldoEsperado}; diferencia $ {$diferencia}."
+            );
 
             // (float) solo al armar el JSON: los cálculos ya terminaron.
             $resumen = [

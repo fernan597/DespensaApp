@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Exceptions\StockInsuficienteException;
 use App\Http\Requests\StoreVentaContadoRequest;
 use App\Http\Requests\StoreVentaCreditoRequest;
@@ -11,6 +12,7 @@ use App\Models\Cliente;
 use App\Models\MovimientoCaja;
 use App\Models\MovimientoCuentaCorrienteCliente;
 use App\Models\Venta;
+use App\Services\AuditoriaService;
 use App\Services\VentaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +22,8 @@ use Throwable;
 class VentaController extends Controller
 {
     public function __construct(
-        protected VentaService $ventaService
+        protected VentaService $ventaService,
+        protected AuditoriaService $auditoriaService
     ) {}
 
     /**
@@ -77,6 +80,11 @@ class VentaController extends Controller
                 'cliente:id,nombre,apellido',
                 'detalles.producto:id,nombre,codigo_barra',
             ]);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::VENTA_CONTADO,
+                "Venta #{$venta->id} de contado por $ {$venta->total} ({$venta->medio_pago})."
+            );
 
             return response()->json([
                 'message' => 'Venta registrada correctamente.',
@@ -154,6 +162,15 @@ class VentaController extends Controller
                 'detalles.producto:id,nombre,codigo_barra',
                 'movimientoCuentaCorriente',
             ]);
+
+            $clienteNombre = $venta->cliente
+                ? "{$venta->cliente->nombre} {$venta->cliente->apellido}"
+                : 'cliente sin identificar';
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::VENTA_CREDITO,
+                "Venta #{$venta->id} a crédito de {$clienteNombre} por $ {$venta->total}."
+            );
 
             return response()->json([
                 'message' => 'Venta a crédito registrada correctamente.',

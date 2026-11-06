@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Exceptions\ProductPriceException;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductPricesRequest;
@@ -9,12 +10,16 @@ use App\Http\Resources\ProductResource;
 use App\Models\Marca;
 use App\Models\Product;
 use App\Services\AlertaStockService;
+use App\Services\AuditoriaService;
 use App\Services\ProductPriceService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     public function index()
     {
         $products = Product::with(['categoria:id,nombre', 'marca:id,nombre'])
@@ -59,6 +64,11 @@ class ProductController extends Controller
 
             $product->load(['categoria:id,nombre', 'marca:id,nombre']);
 
+            $this->auditoriaService->registrar(
+                AccionAuditoria::CREAR_PRODUCTO,
+                "Producto #{$product->id} creado: {$product->nombre} (código {$product->codigo_barra})."
+            );
+
             return response()->json([
                 'message' => 'Producto creado exitosamente',
                 'product' => new ProductResource($product),
@@ -85,6 +95,11 @@ class ProductController extends Controller
             }
 
             $product->delete();
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ELIMINAR_PRODUCTO,
+                "Producto #{$product->id} eliminado: {$product->nombre} (código {$product->codigo_barra})."
+            );
 
             return response()->json([
                 'message' => 'Producto eliminado exitosamente',
@@ -138,6 +153,11 @@ class ProductController extends Controller
 
             $product->load(['categoria:id,nombre', 'marca:id,nombre']);
 
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ACTUALIZAR_PRODUCTO,
+                "Producto #{$product->id} actualizado: {$product->nombre} (código {$product->codigo_barra})."
+            );
+
             return response()->json([
                 'message' => 'Producto actualizado exitosamente',
                 'product' => new ProductResource($product),
@@ -169,6 +189,11 @@ class ProductController extends Controller
                     (string) $data['precio_venta']
                 );
 
+                $this->auditoriaService->registrar(
+                    AccionAuditoria::ACTUALIZAR_PRECIOS,
+                    "Precios actualizados para el producto #{$product->id} ({$product->nombre}): costo $ {$product->precio_compra}, venta $ {$product->precio_venta}."
+                );
+
                 return response()->json([
                     'message' => 'Precio y margen actualizados correctamente',
                     'product' => new ProductResource($product),
@@ -176,6 +201,11 @@ class ProductController extends Controller
             }
 
             $resultado = $service->actualizarMasivo($data);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ACTUALIZAR_PRECIOS,
+                "Actualización masiva de precios: {$resultado['updated_count']} producto(s) actualizados, {$resultado['skipped_count']} omitido(s)."
+            );
 
             $mensaje = "Se actualizaron los precios de {$resultado['updated_count']} producto(s) exitosamente.";
 

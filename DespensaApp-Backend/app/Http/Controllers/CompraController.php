@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Http\Requests\StoreCompraRequest;
 use App\Http\Resources\CompraResource;
 use App\Models\Caja;
@@ -12,6 +13,7 @@ use App\Models\MovimientoCuentaCorrienteProveedor;
 use App\Models\Product;
 use App\Models\Proveedor;
 use App\Services\AlertaStockService;
+use App\Services\AuditoriaService;
 use DomainException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +23,9 @@ use Throwable;
 
 class CompraController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     /**
      * POST /api/compras
      *
@@ -169,6 +174,11 @@ class CompraController extends Controller
                 'proveedor:id,razon_social,saldo_adeudado',
                 'detalles.producto:id,nombre,codigo_barra,stock_actual,precio_compra',
             ]);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::REGISTRAR_COMPRA,
+                "Compra #{$compra->id} a {$compra->proveedor->razon_social} por $ {$compra->total} ({$compra->tipo_pago})."
+            );
 
             return response()->json([
                 'message' => 'Compra registrada correctamente.',

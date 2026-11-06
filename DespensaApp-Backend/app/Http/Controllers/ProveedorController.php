@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Http\Requests\StoreProveedorRequest;
 use App\Http\Resources\ProveedorResource;
 use App\Models\Proveedor;
+use App\Services\AuditoriaService;
 use Illuminate\Http\JsonResponse;
 
 class ProveedorController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     public function index(): JsonResponse
     {
         $proveedores = Proveedor::orderBy('id', 'desc')->get();
@@ -30,6 +35,11 @@ class ProveedorController extends Controller
     {
         $proveedor = Proveedor::create($request->validated());
 
+        $this->auditoriaService->registrar(
+            AccionAuditoria::CREAR_PROVEEDOR,
+            "Proveedor #{$proveedor->id} creado: {$proveedor->razon_social}."
+        );
+
         return response()->json([
             'success' => true,
             'data' => new ProveedorResource($proveedor)
@@ -39,6 +49,11 @@ class ProveedorController extends Controller
     public function update(StoreProveedorRequest $request, Proveedor $proveedor): JsonResponse
     {
         $proveedor->update($request->validated());
+
+        $this->auditoriaService->registrar(
+            AccionAuditoria::ACTUALIZAR_PROVEEDOR,
+            "Proveedor #{$proveedor->id} actualizado: {$proveedor->razon_social}."
+        );
 
         return response()->json([
             'success' => true,
@@ -57,6 +72,11 @@ class ProveedorController extends Controller
 
         try {
             $proveedor->delete();
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ELIMINAR_PROVEEDOR,
+                "Proveedor #{$proveedor->id} eliminado: {$proveedor->razon_social}."
+            );
 
             return response()->json([
                 'success' => true,

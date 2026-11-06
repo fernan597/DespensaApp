@@ -261,7 +261,7 @@ export function SalesTrendCard({
                             analytics
                         </span>
                         <h3 className="text-base font-bold text-on-surface">
-                            Reporte y Evolución de Ventas (Chart.js)
+                            Reporte y Evolución de Ventas
                         </h3>
                     </div>
                     <p className="text-xs text-on-surface-variant mt-0.5">

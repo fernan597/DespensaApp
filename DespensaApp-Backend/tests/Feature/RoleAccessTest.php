@@ -33,6 +33,22 @@ class RoleAccessTest extends TestCase
         $this->getJson('/api/users')->assertOk();
     }
 
+    public function test_admin_y_admin_despensa_pueden_consultar_auditoria(): void
+    {
+        Sanctum::actingAs($this->admin);
+        $this->getJson('/api/auditorias')->assertOk();
+
+        Sanctum::actingAs(User::factory()->create(['role' => 'admin_despensa']));
+        $this->getJson('/api/auditorias')->assertOk();
+    }
+
+    public function test_empleado_no_puede_consultar_auditoria(): void
+    {
+        Sanctum::actingAs(User::factory()->create(['role' => 'empleado']));
+
+        $this->getJson('/api/auditorias')->assertForbidden();
+    }
+
     public function test_admin_no_puede_acceder_al_catalogo_de_productos(): void
     {
         Sanctum::actingAs($this->admin);
