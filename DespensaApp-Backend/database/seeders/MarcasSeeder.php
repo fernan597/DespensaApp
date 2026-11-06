@@ -13,8 +13,7 @@ class MarcasSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('marcas')->insert([
-            'nombre' => 'Generico',       
-        ]);
+        // Idempotente: no duplica la marca si ya existe.
+        DB::table('marcas')->updateOrInsert(['nombre' => 'Generico'], []);
     }
 }

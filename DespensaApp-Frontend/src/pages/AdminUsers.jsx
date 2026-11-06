@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useUsers } from "../features/users/hooks/useUsers";
 import { UserTable } from "../features/users/components/UserTable";
 import { RolePermissions } from "../features/users/components/RolePermissions";
@@ -49,13 +50,25 @@ export function AdminUsers() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 shadow-md hover:bg-primary/90 transition-all active:scale-95 shrink-0"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">person_add</span>
-                            Agregar Usuario
-                        </button>
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                            <Link
+                                to="/admin/auditoria"
+                                className="bg-surface-container-high hover:bg-surface-variant text-on-surface px-4 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">
+                                    policy
+                                </span>
+                                Ver Logs de Auditoría
+                            </Link>
+
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 shadow-md hover:bg-primary/90 transition-all active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                                Agregar Usuario
+                            </button>
+                        </div>
                     </header>
 
                     {/* Grid de contenido */}

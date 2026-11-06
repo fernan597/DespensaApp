@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
             MarcasSeeder::class,
             ClienteSeeder::class,
         ]);
-        \App\Models\Product::factory(50)->create();
+
+        // Productos de prueba: solo si la tabla está vacía, para no duplicar en cada corrida.
+        if (\App\Models\Product::count() === 0) {
+            \App\Models\Product::factory(50)->create();
+        }
     }
 }

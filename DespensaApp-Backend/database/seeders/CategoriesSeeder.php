@@ -13,16 +13,21 @@ class CategoriesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('categories')->insert([
-            ['nombre' => 'Lácteos'],
-            ['nombre' => 'Pescados'],
-            ['nombre' => 'Quesos'],
-            ['nombre' => 'Carnes'],
-            ['nombre' => 'Frutas'],
-            ['nombre' => 'Verduras'],
-            ['nombre' => 'Cereales'],
-            ['nombre' => 'Bebidas'],
-            ['nombre' => 'Otros'],
-        ]);
+        $categorias = [
+            'Lácteos',
+            'Pescados',
+            'Quesos',
+            'Carnes',
+            'Frutas',
+            'Verduras',
+            'Cereales',
+            'Bebidas',
+            'Otros',
+        ];
+
+        // Idempotente: solo inserta las categorías que aún no existen.
+        foreach ($categorias as $nombre) {
+            DB::table('categories')->updateOrInsert(['nombre' => $nombre], []);
+        }
     }
 }

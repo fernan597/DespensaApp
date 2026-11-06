@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AlertaStockController;
+use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\MovimientoCajaController;
@@ -44,6 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    });
+
+    // [CU03] Consulta de logs de auditoría — Administrador del Sistema y del Negocio
+    Route::middleware('role:admin,admin_despensa')->group(function () {
+        Route::get('/auditorias/filtros', [AuditoriaController::class, 'filtros']);
+        Route::get('/auditorias', [AuditoriaController::class, 'index']);
+        Route::get('/auditorias/{auditoria}', [AuditoriaController::class, 'show']);
     });
 
     Route::middleware('role:admin_despensa')->group(function () {

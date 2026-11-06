@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Marca;
 use App\Models\DetalleVenta;
 use App\Models\Product;
 use App\Models\User;
@@ -18,6 +19,7 @@ class ReporteTest extends TestCase
 
     private User $adminDespensa;
     private Category $categoria;
+    private Marca $marca;
     private Product $prodYerba;
     private Product $prodLeche;
 
@@ -35,6 +37,10 @@ class ReporteTest extends TestCase
             'nombre' => 'Almacén',
         ]);
 
+        $this->marca = Marca::create([
+            'nombre' => 'Genérica',
+        ]);
+
         $this->prodYerba = Product::create([
             'nombre'        => 'Yerba Mate 1kg',
             'codigo_barra'  => '7790001000011',
@@ -43,6 +49,7 @@ class ReporteTest extends TestCase
             'precio_compra' => 2000.00,
             'precio_venta'  => 3000.00,
             'categoria_id'  => $this->categoria->id,
+            'marca_id'      => $this->marca->id,
         ]);
 
         $this->prodLeche = Product::create([
@@ -53,6 +60,7 @@ class ReporteTest extends TestCase
             'precio_compra' => 1000.00,
             'precio_venta'  => 1500.00,
             'categoria_id'  => $this->categoria->id,
+            'marca_id'      => $this->marca->id,
         ]);
     }
 

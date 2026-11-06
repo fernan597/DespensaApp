@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use Illuminate\Http\Request;
 use App\Models\Marca;
 use App\Http\Requests\StoreMarcaRequest;
 use App\Http\Resources\MarcaResource;
+use App\Services\AuditoriaService;
 
 class MarcaController extends Controller
 {
+    public function __construct(
+        protected AuditoriaService $auditoriaService
+    ) {}
     public function index(){
         $marcas = Marca::orderBy('nombre', 'asc')->get();
         return response()->json([
@@ -22,6 +27,11 @@ class MarcaController extends Controller
             $marca = Marca::create([
                 'nombre' => $validatedData['nombre'],
             ]);
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::CREAR_MARCA,
+                "Marca #{$marca->id} creada: {$marca->nombre}."
+            );
 
             return response()->json([
                 'message' => 'Marca creada exitosamente',
@@ -51,6 +61,12 @@ class MarcaController extends Controller
             }
 
             $marca->delete();
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::ELIMINAR_MARCA,
+                "Marca #{$marca->id} eliminada: {$marca->nombre}."
+            );
+
             return response()->json([
                 'message' => 'Marca eliminada exitosamente',
             ]);

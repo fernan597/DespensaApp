@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccionAuditoria;
 use App\Enums\MedioPago;
 use App\Exceptions\FondosInsuficientesException;
 use App\Exceptions\PagoProveedorException;
 use App\Http\Requests\StorePagoProveedorRequest;
 use App\Http\Resources\PagoProveedorResource;
 use App\Http\Resources\ProveedorResource;
+use App\Services\AuditoriaService;
 use App\Services\PagoProveedorService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +17,8 @@ use Illuminate\Http\JsonResponse;
 class PagoProveedorController extends Controller
 {
     public function __construct(
-        protected PagoProveedorService $pagoProveedorService
+        protected PagoProveedorService $pagoProveedorService,
+        protected AuditoriaService $auditoriaService
     ) {}
 
     /**
@@ -33,12 +36,20 @@ class PagoProveedorController extends Controller
                 medioPago: MedioPago::from($request->validated('medio_pago'))
             );
 
+            $pago      = $resultado['pago'];
+            $proveedor = $resultado['proveedor'];
+
+            $this->auditoriaService->registrar(
+                AccionAuditoria::PAGO_PROVEEDOR,
+                "Pago #{$pago->id} a {$proveedor->razon_social} por $ {$pago->monto} ({$request->validated('medio_pago')})."
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pago a proveedor registrado exitosamente.',
                 'data'    => [
-                    'pago'      => new PagoProveedorResource($resultado['pago']),
-                    'proveedor' => new ProveedorResource($resultado['proveedor']),
+                    'pago'      => new PagoProveedorResource($pago),
+                    'proveedor' => new ProveedorResource($proveedor),
                 ],
             ], 201);
         } catch (FondosInsuficientesException $e) {
