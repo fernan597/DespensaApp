@@ -13,19 +13,25 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $adminEmail = env('ADMIN_EMAIL');
+        $adminPassword = env('ADMIN_PASSWORD');
+
+        $despensaEmail = env('ADMIN_DESPENSA_EMAIL');
+        $despensaPassword = env('ADMIN_DESPENSA_PASSWORD');
+
         User::updateOrCreate(
-            ['email' => 'admin@despensa.com'],
+            ['email' => $adminEmail],
             [
                 'name'     => 'Administrador',
-                'password' => Hash::make('admin1234'),
+                'password' => Hash::make($adminPassword),
                 'role'     => 'admin',
             ]
         );
         User::updateOrCreate(
-            ['email' => 'despensa@gmail.com'],
+            ['email' => $despensaEmail],
             [
                 'name'     => 'Administrador Despensa',
-                'password' => Hash::make('admindespensa1234'),
+                'password' => Hash::make($despensaPassword),
                 'role'     => 'admin_despensa',
             ]
         );
