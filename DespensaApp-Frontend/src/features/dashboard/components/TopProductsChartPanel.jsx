@@ -225,11 +225,11 @@ export function TopProductsChartPanel({
                     {productos.slice(0, 3).map((prod, idx) => (
                         <div
                             key={prod.producto_id}
-                            className="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/25 flex items-center justify-between gap-2"
+                            className="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/25 flex flex-col justify-between gap-1.5"
                         >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-1.5 min-w-0">
                                 <span
-                                    className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 ${
+                                    className={`w-5 h-5 rounded-md text-[11px] font-bold flex items-center justify-center shrink-0 ${
                                         idx === 0
                                             ? "bg-primary text-on-primary"
                                             : "bg-secondary-container text-primary"
@@ -237,18 +237,18 @@ export function TopProductsChartPanel({
                                 >
                                     #{idx + 1}
                                 </span>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-bold text-on-surface truncate">
-                                        {prod.nombre}
-                                    </p>
-                                    <p className="text-[11px] text-on-surface-variant font-mono tabular-nums">
-                                        {formatCurrency(prod.total_recaudado)}
-                                    </p>
-                                </div>
+                                <p className="text-xs font-bold text-on-surface truncate" title={prod.nombre}>
+                                    {prod.nombre}
+                                </p>
                             </div>
-                            <span className="px-2 py-0.5 rounded-md bg-secondary-container/70 text-primary text-xs font-bold font-mono tabular-nums shrink-0">
-                                {prod.cantidad_vendida} un.
-                            </span>
+                            <div className="flex items-center justify-between gap-1 pt-1 border-t border-outline-variant/15 text-[11px]">
+                                <span className="text-on-surface-variant font-mono font-medium tabular-nums">
+                                    {formatCurrency(prod.total_recaudado)}
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded-md bg-secondary-container/70 text-primary text-[10px] font-bold font-mono tabular-nums shrink-0">
+                                    {prod.cantidad_vendida} un.
+                                </span>
+                            </div>
                         </div>
                     ))}
                 </div>

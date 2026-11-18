@@ -56,17 +56,8 @@ class User extends Authenticatable
      * @param string|array $roles
      * @return bool
      */
-    public function hasRole(string|array ...$roles): bool
+    public function hasRole(array $roles): bool
     {
-        $flattenedRoles = [];
-        foreach ($roles as $role) {
-            if (is_array($role)) {
-                $flattenedRoles = array_merge($flattenedRoles, $role);
-            } else {
-                $flattenedRoles[] = $role;
-            }
-        }
-
-        return in_array($this->role, $flattenedRoles, true);
+       return in_array($this->role, $roles, true);
     }
 }
