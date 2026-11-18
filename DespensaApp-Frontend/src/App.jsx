@@ -8,6 +8,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { AdminUsers } from "./pages/AdminUsers";
 import { AdminProducts } from "./pages/AdminProducts";
 import { AdminProveedores } from "./pages/AdminProveedores";
+import { AdminClientes } from "./pages/AdminClientes";
 import { PuntoDeVenta } from "./pages/PuntoDeVenta";
 import { RegistrarCompra } from "./pages/RegistrarCompra";
 import { CuentaCorrienteProveedor } from "./pages/CuentaCorrienteProveedor";
@@ -41,10 +42,11 @@ function App() {
                 <Route path="/admin/auditoria" element={<HistorialOperaciones />} />
               </Route>
 
-              {/* Exclusivo Admin Despensa — Gestión de Productos, Proveedores, Compras y Cuentas Corrientes */}
+              {/* Exclusivo Admin Despensa — Gestión de Productos, Proveedores, Clientes, Compras y Cuentas Corrientes */}
               <Route element={<RoleRoute roles={["admin_despensa"]} />}>
                 <Route path="/admin/productos" element={<AdminProducts />} />
                 <Route path="/admin/proveedores" element={<AdminProveedores />} />
+                <Route path="/admin/clientes" element={<AdminClientes />} />
                 <Route path="/admin/compras" element={<RegistrarCompra />} />
                 <Route path="/admin/cuentas-corrientes-proveedores" element={<CuentaCorrienteProveedor />} />
               </Route>

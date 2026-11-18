@@ -18,7 +18,8 @@ export function AdminProducts() {
         categories,
         marcas,
         fetchProducts,
-        fetchMetadata,
+        fetchCategorias,
+        fetchMarcas,
         removeProduct,
     } = useProducts();
 
@@ -158,7 +159,8 @@ export function AdminProducts() {
                 scannedBarcode={scannedBarcode}
                 onSuccess={() => {
                     fetchProducts();
-                    fetchMetadata();
+                    fetchCategorias();
+                    fetchMarcas();
                 }}
                 onOpenNewCategory={() => setIsCategoryModalOpen(true)}
             />
@@ -168,7 +170,7 @@ export function AdminProducts() {
                 isOpen={isCategoryModalOpen}
                 onClose={() => setIsCategoryModalOpen(false)}
                 onCategoryCreated={() => {
-                    fetchMetadata();
+                    fetchCategorias();
                 }}
             />
 

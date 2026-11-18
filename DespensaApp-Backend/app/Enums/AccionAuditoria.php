@@ -45,6 +45,11 @@ enum AccionAuditoria: string
     case ACTUALIZAR_PROVEEDOR = 'ACTUALIZAR_PROVEEDOR';
     case ELIMINAR_PROVEEDOR = 'ELIMINAR_PROVEEDOR';
 
+    // Clientes
+    case CREAR_CLIENTE = 'CREAR_CLIENTE';
+    case ACTUALIZAR_CLIENTE = 'ACTUALIZAR_CLIENTE';
+    case ELIMINAR_CLIENTE = 'ELIMINAR_CLIENTE';
+
     /**
      * Etiqueta legible en español para mostrar en la interfaz.
      */
@@ -75,6 +80,9 @@ enum AccionAuditoria: string
             self::CREAR_PROVEEDOR        => 'Creación de proveedor',
             self::ACTUALIZAR_PROVEEDOR   => 'Actualización de proveedor',
             self::ELIMINAR_PROVEEDOR     => 'Eliminación de proveedor',
+            self::CREAR_CLIENTE          => 'Creación de cliente',
+            self::ACTUALIZAR_CLIENTE     => 'Actualización de cliente',
+            self::ELIMINAR_CLIENTE       => 'Eliminación de cliente',
         };
     }
 
@@ -114,6 +122,10 @@ enum AccionAuditoria: string
             self::CREAR_PROVEEDOR,
             self::ACTUALIZAR_PROVEEDOR,
             self::ELIMINAR_PROVEEDOR     => 'PROVEEDORES',
+
+            self::CREAR_CLIENTE,
+            self::ACTUALIZAR_CLIENTE,
+            self::ELIMINAR_CLIENTE       => 'CLIENTES',
         };
     }
 }

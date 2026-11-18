@@ -120,7 +120,6 @@ export function ProductFormModal({
                 {/* Código de barras */}
                 <InputField
                     label="Código de Barras"
-                    required
                     value={formData.codigo_barra}
                     onChange={(e) => setFormData({ ...formData, codigo_barra: e.target.value })}
                     placeholder="Ej: 779123456789"

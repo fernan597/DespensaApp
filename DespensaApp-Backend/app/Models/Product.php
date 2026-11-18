@@ -31,7 +31,7 @@ class Product extends Model
         'precio_compra' => 'decimal:2',
         'precio_venta'  => 'decimal:2',
     ];
-
+    
     public function categoria()
     {
         return $this->belongsTo(Category::class, 'categoria_id')->withTrashed();

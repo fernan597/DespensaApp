@@ -231,25 +231,27 @@ export function CuentaCorrienteCliente() {
                                                     <div className="flex items-center justify-end gap-2">
                                                         {tieneDeuda && (
                                                             <button
+                                                                type="button"
                                                                 onClick={() => handleOpenCobro(c)}
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-on-primary transition-all active:scale-95 shadow-sm"
                                                                 title="Registrar cobro / entrega"
                                                             >
                                                                 <span className="material-symbols-outlined text-[16px]">
-                                                                    price_check
+                                                                    payments
                                                                 </span>
                                                                 <span>Cobrar</span>
                                                             </button>
                                                         )}
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleOpenHistory(c.id)}
                                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-container hover:bg-surface-variant transition-all text-on-surface border border-outline-variant/30 active:scale-95 shadow-sm"
                                                             title="Ver historial de movimientos"
                                                         >
                                                             <span className="material-symbols-outlined text-[16px]">
-                                                                history
+                                                                receipt_long
                                                             </span>
-                                                            <span>Ver Extracto</span>
+                                                            <span>Historial</span>
                                                         </button>
                                                     </div>
                                                 </td>

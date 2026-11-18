@@ -9,7 +9,7 @@ import { useCarritoVenta } from "../features/ventas/hooks/useCarritoVenta";
 import { getProducts } from "../services/productService";
 import { registrarVentaContado, registrarVentaCredito } from "../services/ventaService";
 import { formatCurrency } from "../utils/formatters";
-
+import { generarTicket } from "../utils/generarTickets";
 /**
  * Página del Punto de Venta.
  * Roles: admin_despensa, empleado.
@@ -34,22 +34,23 @@ export function PuntoDeVenta() {
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
 
-    // Cargar catálogo de productos al montar (una sola vez)
-    const fetchProductos = useCallback(async () => {
+    // Cargar productos
+    const fetchProducts = useCallback(async () => {
         try {
             setLoadingProductos(true);
-            const data = await getProducts();
-            setProductos(Array.isArray(data) ? data : data?.products ?? []);
-        } catch (err) {
-            console.error("Error al cargar productos:", err);
+            const response = await getProducts();
+            setProductos(response || []);
+        } catch (error) {
+            console.error("Error al cargar productos:", error);
+            setProductos([]);
         } finally {
             setLoadingProductos(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchProductos();
-    }, [fetchProductos]);
+        fetchProducts();
+    }, [fetchProducts]);
 
     /**
      * Construye el payload y llama a la API según la modalidad (Contado o Crédito).
@@ -89,7 +90,7 @@ export function PuntoDeVenta() {
             setVentaExitosa(data.venta);
             limpiarCarrito();
             setClienteSeleccionado(null);
-            fetchProductos(); // Refresca stock actualizado
+            fetchProducts(); // Refresca stock actualizado
         } catch (err) {
             const primerError = err.data?.errors
                 ? Object.values(err.data.errors).flat()[0]
@@ -164,12 +165,25 @@ export function PuntoDeVenta() {
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setVentaExitosa(null)}
-                        className="text-on-surface-variant hover:text-on-surface"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">close</span>
-                    </button>
+                    <div className="flex items-center gap-sm shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => generarTicket(ventaExitosa)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-green-700 text-white hover:bg-green-800 text-xs font-semibold shadow-sm transition-colors active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">
+                                picture_as_pdf
+                            </span>
+                            <span>Descargar Ticket PDF</span>
+                        </button>
+                        <button
+                            onClick={() => setVentaExitosa(null)}
+                            className="text-on-surface-variant hover:text-on-surface p-1"
+                            title="Cerrar aviso"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
                 </div>
             )}
 

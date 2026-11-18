@@ -13,17 +13,22 @@ export function useProducts() {
     const [categories, setCategories] = useState([]);
     const [marcas, setMarcas] = useState([]);
 
-    // Cargar metadatos (categorías y marcas)
-    const fetchMetadata = useCallback(async () => {
+
+    const fetchCategorias = useCallback(async () => {
         try {
-            const [cats, brs] = await Promise.all([
-                getCategories().catch(() => []),
-                getMarcas().catch(() => []),
-            ]);
-            setCategories(Array.isArray(cats) ? cats : []);
-            setMarcas(Array.isArray(brs) ? brs : []);
+            const response = await getCategories();
+            setCategories(response);
         } catch (error) {
-            console.error("Error al cargar categorías o marcas:", error);
+            console.error("Error al cargar categorías:", error);
+        }
+    }, []);
+
+    const fetchMarcas = useCallback(async () => {
+        try {
+            const response = await getMarcas();
+            setMarcas(response);
+        } catch (error) {
+            console.error("Error al cargar marcas:", error);
         }
     }, []);
 
@@ -43,9 +48,10 @@ export function useProducts() {
 
     // Cargar metadatos y catálogo una única vez al montar
     useEffect(() => {
-        fetchMetadata();
+        fetchCategorias();
+        fetchMarcas();
         fetchProducts();
-    }, [fetchMetadata, fetchProducts]);
+    }, [fetchCategorias, fetchMarcas, fetchProducts]);
 
     // Eliminar producto con confirmación
     const removeProduct = async (id) => {
@@ -83,7 +89,8 @@ export function useProducts() {
         categories,
         marcas,
         fetchProducts,
-        fetchMetadata,
+        fetchCategorias,
+        fetchMarcas,
         removeProduct,
     };
 }

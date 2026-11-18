@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { getDetalleCuentaCorrienteProveedor } from "../../../services/cuentaCorrienteProveedorService";
 import { formatCurrency } from "../../../utils/formatters";
-import { DateRangeFilter } from "../../cuentas-corrientes-common/components/DateRangeFilter";
 import { ExtractoMovimientosTable } from "../../cuentas-corrientes-common/components/ExtractoMovimientosTable";
 
 /**
@@ -18,16 +17,12 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOp
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Filtros de fecha
-    const [fechaDesde, setFechaDesde] = useState("");
-    const [fechaHasta, setFechaHasta] = useState("");
-
-    const fetchHistorial = useCallback(async (filters = {}) => {
+    const fetchHistorial = useCallback(async () => {
         if (!proveedorId) return;
         try {
             setLoading(true);
             setError(null);
-            const res = await getDetalleCuentaCorrienteProveedor(proveedorId, filters);
+            const res = await getDetalleCuentaCorrienteProveedor(proveedorId);
             setData(res);
         } catch (err) {
             console.error("Error al cargar historial de movimientos:", err);
@@ -40,8 +35,6 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOp
     // Cargar historial al abrir el modal o cambiar de proveedor
     useEffect(() => {
         if (isOpen && proveedorId) {
-            setFechaDesde("");
-            setFechaHasta("");
             fetchHistorial();
         } else {
             setData(null);
@@ -49,25 +42,9 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOp
         }
     }, [isOpen, proveedorId, fetchHistorial]);
 
-    const handleApplyFilters = (e) => {
-        e.preventDefault();
-        fetchHistorial({
-            fecha_desde: fechaDesde || undefined,
-            fecha_hasta: fechaHasta || undefined,
-        });
-    };
-
-    const handleClearFilters = () => {
-        setFechaDesde("");
-        setFechaHasta("");
-        fetchHistorial({});
-    };
-
     const proveedor = data?.proveedor;
     const saldoAdeudado = Number(proveedor?.saldo_adeudado) || 0;
     const movimientos = data?.movimientos || [];
-    const periodo = data?.periodo;
-    const tieneFiltrosActivos = Boolean(fechaDesde || fechaHasta);
 
     return (
         <Modal
@@ -149,17 +126,6 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOp
                     </div>
                 )}
 
-                {/* ── Barra de Filtros por Rango de Fechas ── */}
-                <DateRangeFilter
-                    fechaDesde={fechaDesde}
-                    setFechaDesde={setFechaDesde}
-                    fechaHasta={fechaHasta}
-                    setFechaHasta={setFechaHasta}
-                    onApply={handleApplyFilters}
-                    onClear={handleClearFilters}
-                    loading={loading}
-                />
-
                 {/* ── Mensaje de Error ── */}
                 {error && (
                     <div className="p-3 bg-error-container/30 border border-error/30 rounded-xl text-xs text-error">
@@ -170,8 +136,6 @@ export function DetalleMovimientosProveedor({ isOpen, onClose, proveedorId, onOp
                 {/* ── Tabla de Movimientos ── */}
                 <ExtractoMovimientosTable
                     movimientos={movimientos}
-                    periodo={periodo}
-                    tieneFiltrosActivos={tieneFiltrosActivos}
                     loading={loading}
                 />
 

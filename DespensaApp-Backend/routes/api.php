@@ -73,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
             'proveedores' => 'proveedor'
         ]);
 
+        // Rutas para administración de clientes (ABM exclusivo admin_despensa)
+        Route::post('/clientes', [ClienteController::class, 'store']);
+        Route::get('/clientes/{cliente}', [ClienteController::class, 'show']);
+        Route::put('/clientes/{cliente}', [ClienteController::class, 'update']);
+        Route::delete('/clientes/{cliente}', [ClienteController::class, 'destroy']);
+
         // Rutas para compras de mercadería
         Route::post('/compras', [CompraController::class, 'store']);
         Route::get('/compras', [CompraController::class, 'index']);

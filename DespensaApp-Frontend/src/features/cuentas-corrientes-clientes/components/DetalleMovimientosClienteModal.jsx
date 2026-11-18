@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { getDetalleCuentaCorrienteCliente } from "../../../services/cuentaCorrienteClienteService";
 import { formatCurrency } from "../../../utils/formatters";
-import { DateRangeFilter } from "../../cuentas-corrientes-common/components/DateRangeFilter";
 import { ExtractoMovimientosTable } from "../../cuentas-corrientes-common/components/ExtractoMovimientosTable";
 
 /**
@@ -19,16 +18,12 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Filtros de fecha
-    const [fechaDesde, setFechaDesde] = useState("");
-    const [fechaHasta, setFechaHasta] = useState("");
-
-    const fetchHistorial = useCallback(async (filters = {}) => {
+    const fetchHistorial = useCallback(async () => {
         if (!clienteId) return;
         try {
             setLoading(true);
             setError(null);
-            const res = await getDetalleCuentaCorrienteCliente(clienteId, filters);
+            const res = await getDetalleCuentaCorrienteCliente(clienteId);
             setData(res);
         } catch (err) {
             console.error("Error al cargar historial de movimientos:", err);
@@ -41,8 +36,6 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
     // Cargar historial al abrir el modal o cambiar de cliente
     useEffect(() => {
         if (isOpen && clienteId) {
-            setFechaDesde("");
-            setFechaHasta("");
             fetchHistorial();
         } else {
             setData(null);
@@ -50,24 +43,8 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
         }
     }, [isOpen, clienteId, fetchHistorial]);
 
-    const handleApplyFilters = (e) => {
-        e.preventDefault();
-        fetchHistorial({
-            fecha_desde: fechaDesde || undefined,
-            fecha_hasta: fechaHasta || undefined,
-        });
-    };
-
-    const handleClearFilters = () => {
-        setFechaDesde("");
-        setFechaHasta("");
-        fetchHistorial({});
-    };
-
     const cliente = data?.cliente;
     const movimientos = data?.movimientos || [];
-    const periodo = data?.periodo;
-    const tieneFiltrosActivos = Boolean(fechaDesde || fechaHasta);
 
     return (
         <Modal
@@ -93,11 +70,10 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
                                     {cliente.nombre_completo}
                                 </h3>
                                 <span
-                                    className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
-                                        cliente.saldo_cuenta_corriente > 0
+                                    className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${cliente.saldo_cuenta_corriente > 0
                                             ? "bg-error-container text-on-error-container"
                                             : "bg-secondary-container text-on-secondary-container"
-                                    }`}
+                                        }`}
                                 >
                                     {cliente.saldo_cuenta_corriente > 0 ? "Saldo Deudor" : "Al Día"}
                                 </span>
@@ -125,9 +101,8 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
                                     Saldo Pendiente Actual
                                 </p>
                                 <p
-                                    className={`text-xl font-bold ${
-                                        cliente.saldo_cuenta_corriente > 0 ? "text-error" : "text-primary"
-                                    }`}
+                                    className={`text-xl font-bold ${cliente.saldo_cuenta_corriente > 0 ? "text-error" : "text-primary"
+                                        }`}
                                 >
                                     {formatCurrency(cliente.saldo_cuenta_corriente)}
                                 </p>
@@ -138,7 +113,7 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
                                     onClick={() => onOpenCobro(cliente)}
                                     className="px-3.5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-semibold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
                                 >
-                                    <span className="material-symbols-outlined text-[16px]">price_check</span>
+                                    <span className="material-symbols-outlined text-[16px]">payments</span>
                                     <span>Cobrar</span>
                                 </button>
                             )}
@@ -146,16 +121,7 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
                     </div>
                 )}
 
-                {/* ── Barra de Filtros por Rango de Fechas ── */}
-                <DateRangeFilter
-                    fechaDesde={fechaDesde}
-                    setFechaDesde={setFechaDesde}
-                    fechaHasta={fechaHasta}
-                    setFechaHasta={setFechaHasta}
-                    onApply={handleApplyFilters}
-                    onClear={handleClearFilters}
-                    loading={loading}
-                />
+
 
                 {/* ── Mensaje de Error ── */}
                 {error && (
@@ -167,8 +133,6 @@ export function DetalleMovimientosClienteModal({ isOpen, onClose, clienteId, onO
                 {/* ── Tabla de Movimientos ── */}
                 <ExtractoMovimientosTable
                     movimientos={movimientos}
-                    periodo={periodo}
-                    tieneFiltrosActivos={tieneFiltrosActivos}
                     loading={loading}
                 />
 

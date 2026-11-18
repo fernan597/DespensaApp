@@ -8,6 +8,7 @@ const CATEGORIA_ESTILOS = {
     COMPRAS: "bg-secondary-fixed text-on-secondary-fixed",
     CATALOGO: "bg-surface-variant text-on-surface-variant",
     PROVEEDORES: "bg-error-container/70 text-on-error-container",
+    CLIENTES: "bg-tertiary-container text-on-tertiary-container",
 };
 
 const CATEGORIA_ICONOS = {
@@ -18,6 +19,7 @@ const CATEGORIA_ICONOS = {
     COMPRAS: "shopping_cart",
     CATALOGO: "inventory_2",
     PROVEEDORES: "local_shipping",
+    CLIENTES: "person",
 };
 
 function BadgeAccion({ accion }) {

@@ -15,15 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AdminUserSeeder::class,
-            CategoriesSeeder::class,
-            MarcasSeeder::class,
-            ClienteSeeder::class,
+            DemoPresentationSeeder::class,
         ]);
-
-        // Productos de prueba: solo si la tabla está vacía, para no duplicar en cada corrida.
-        if (\App\Models\Product::count() === 0) {
-            \App\Models\Product::factory(50)->create();
-        }
     }
 }

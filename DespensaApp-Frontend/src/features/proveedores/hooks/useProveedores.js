@@ -26,20 +26,18 @@ export function useProveedores() {
     }, [fetchProveedores]);
 
     const removeProveedor = async (id) => {
-        if (!confirm("¿Estás seguro de eliminar este proveedor?")) return false;
-
         try {
             await deleteProveedor(id);
             setProveedores((prev) => prev.filter((p) => p.id !== id));
-            return true;
+            return { success: true };
         } catch (error) {
-            // 409 significa que tiene registros asociados (compras, pagos, etc.)
             const msg =
-                error.status === 409
-                    ? "No se puede eliminar: el proveedor tiene registros asociados."
-                    : error.message || "Error al eliminar el proveedor";
-            alert(msg);
-            return false;
+                error.data?.message ||
+                error.message ||
+                (error.status === 409
+                    ? "No se puede eliminar: el proveedor tiene compras o saldo registrado."
+                    : "Error al eliminar el proveedor.");
+            return { success: false, message: msg };
         }
     };
 

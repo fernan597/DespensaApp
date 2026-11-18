@@ -25,9 +25,9 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'codigo_barra' => 'required|string|max:255',
+            'codigo_barra' => 'string|max:255|nullable',
             'stock_actual' => 'required|integer|min:0',
-            'stock_minimo' => 'required|integer|min:0',
+            'stock_minimo' => 'required|integer|min:0|lt:stock_actual',
             'precio_compra' => 'required|numeric|min:0',
             'precio_venta' => 'required|numeric|gt:0',
             'categoria_id' => [
@@ -48,7 +48,6 @@ class StoreProductRequest extends FormRequest
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser texto.',
             'name.max' => 'El nombre no puede exceder 255 caracteres.',
-            'codigo_barra.required' => 'El código de barras es obligatorio.',
             'codigo_barra.string' => 'El código de barras debe ser texto.',
             'stock_actual.required' => 'El stock actual es obligatorio.',
             'stock_actual.integer' => 'El stock actual debe ser un número entero.',
@@ -56,6 +55,7 @@ class StoreProductRequest extends FormRequest
             'stock_minimo.required' => 'El stock mínimo es obligatorio.',
             'stock_minimo.integer' => 'El stock mínimo debe ser un número entero.',
             'stock_minimo.min' => 'El stock mínimo no puede ser negativo.',
+            'stock_minimo.lt' => 'El stock mínimo debe ser menor al stock actual.',
             'precio_compra.required' => 'El precio de compra es obligatorio.',
             'precio_compra.numeric' => 'El precio de compra debe ser un número.',
             'precio_compra.min' => 'El precio de compra no puede ser negativo.',

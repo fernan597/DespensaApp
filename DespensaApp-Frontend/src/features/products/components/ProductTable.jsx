@@ -50,32 +50,33 @@ export function ProductTable({ products = [], loading, onEdit, onQuickPrice, onD
                                                 {product.marca?.nombre || "Sin marca"}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-on-surface-variant">
+                                        <td className="p-4 text-on-surface-variant whitespace-nowrap">
                                             {formatCurrency(product.precio_compra)}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold text-primary">
                                                     {formatCurrency(product.precio_venta)}
                                                 </span>
                                                 {Number(product.precio_compra) > 0 && (
-                                                    <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary-container/50 text-on-primary-container">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary-container/50 text-on-primary-container">
                                                         {calcularMargen(product.precio_compra, product.precio_venta).toFixed(1)}%
                                                     </span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 whitespace-nowrap">
                                             <span
-                                                className={`px-2.5 py-1 rounded-full text-xs font-medium ${isLowStock
+                                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${isLowStock
                                                         ? "bg-error-container text-on-error-container"
                                                         : "bg-secondary-fixed text-on-secondary-fixed"
                                                     }`}
                                             >
-                                                {product.stock_actual} un.
+                                                <span>{product.stock_actual}</span>
+                                                <span>un.</span>
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right space-x-1">
+                                        <td className="p-4 text-right whitespace-nowrap space-x-1">
                                             {onQuickPrice && (
                                                 <button
                                                     onClick={() => onQuickPrice(product)}

@@ -30,7 +30,14 @@ class VentaService
      */
     public function prepararItems(array $items): array
     {
+        // Obtiene los IDs de los productos sin repetir y ordenados de menor a mayor.
+       // El orden consistente evita deadlocks: si dos transacciones bloquean los mismos
+      // productos, ambas lo hacen en el mismo orden y no quedan esperándose mutuamente.
         $productIds = collect($items)->pluck('producto_id')->unique()->sort()->values()->all();
+
+        // Trae todos los productos en una sola consulta (evita el problema N+1) y los
+    // bloquea con "SELECT ... FOR UPDATE" hasta que termine la transacción.
+    // keyBy('id') permite buscarlos después por ID de forma directa.
         $productosDb = Product::whereIn('id', $productIds)
             ->orderBy('id')
             ->lockForUpdate()
@@ -42,29 +49,36 @@ class VentaService
 
         foreach ($items as $item) {
             /** @var Product|null $producto */
+            // Busca el producto en la colección ya cargada. Si por algún motivo no está,
+        // lo consulta de nuevo con lock; findOrFail lanza ModelNotFoundException
+        // si el producto no existe.
             $producto = $productosDb->get($item['producto_id'])
                 ?? Product::lockForUpdate()->findOrFail($item['producto_id']);
 
+            // Normaliza la cantidad a entero (puede llegar como string desde el request).
             $cantidad = (int) $item['cantidad'];
 
+            // Verifica que alcance el stock; si no, aborta con un mensaje claro
+        // indicando producto, stock disponible y cantidad pedida.
             if ($producto->stock_actual < $cantidad) {
                 throw new StockInsuficienteException(
                     "Stock insuficiente para '{$producto->nombre}'. " .
                     "Disponible: {$producto->stock_actual}, solicitado: {$cantidad}."
                 );
             }
-
+            // Guarda el modelo (para descontar stock después) junto con la cantidad.
             $productos[] = [
                 'modelo'   => $producto,
                 'cantidad' => $cantidad,
             ];
-
+            // Subtotal del ítem = precio de venta × cantidad, con 2 decimales exactos.
             $subtotalItem = bcmul((string) $producto->precio_venta, (string) $cantidad, 2);
             $total        = bcadd($total, $subtotalItem, 2);
         }
 
         return [
             'productos' => $productos,
+            // Convierte a float solo al final, para devolver el total ya calculado.
             'total'     => (float) $total,
         ];
     }

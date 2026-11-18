@@ -133,7 +133,10 @@ class SoftDeletesTest extends TestCase
             'saldo_cuenta_corriente' => '0.00',
         ]);
 
-        $cliente->delete();
+        $response = $this->actingAs($this->admin)
+            ->deleteJson("/api/clientes/{$cliente->id}");
+
+        $response->assertStatus(200);
 
         $this->assertNull(Cliente::find($cliente->id));
         $this->assertNotNull(Cliente::withTrashed()->find($cliente->id)->deleted_at);

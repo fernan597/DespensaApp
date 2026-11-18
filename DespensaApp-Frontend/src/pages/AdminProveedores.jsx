@@ -3,6 +3,8 @@ import { useProveedores } from "../features/proveedores/hooks/useProveedores";
 import { ProveedorFormModal } from "../features/proveedores/components/ProveedorFormModal";
 import { ProveedoresTable } from "../features/proveedores/components/ProveedoresTable";
 import { SearchBar } from "../components/ui/SearchBar";
+import { ConfirmModal } from "../components/ui/ConfirmModal";
+import { Toast } from "../components/feedback/Toast";
 import { formatCurrency } from "../utils/formatters";
 
 /**
@@ -24,6 +26,14 @@ export function AdminProveedores() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProveedor, setEditingProveedor] = useState(null);
 
+    // Estado para el modal de confirmación de eliminación
+    const [proveedorToDelete, setProveedorToDelete] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Estado para feedback visual con Toast
+    const [toast, setToast] = useState(null);
+
     const handleOpenCreate = () => {
         setEditingProveedor(null);
         setIsModalOpen(true);
@@ -37,6 +47,41 @@ export function AdminProveedores() {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingProveedor(null);
+    };
+
+    // Solicitar confirmación de eliminación
+    const handleRequestDelete = (proveedor) => {
+        setProveedorToDelete(proveedor);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        if (isDeleting) return;
+        setIsDeleteModalOpen(false);
+        setProveedorToDelete(null);
+    };
+
+    // Ejecutar eliminación tras confirmación en el modal
+    const handleConfirmDelete = async () => {
+        if (!proveedorToDelete) return;
+
+        setIsDeleting(true);
+        const result = await removeProveedor(proveedorToDelete.id);
+        setIsDeleting(false);
+
+        if (result.success) {
+            setToast({
+                message: `Proveedor "${proveedorToDelete.razon_social}" eliminado correctamente.`,
+                type: "success",
+            });
+            handleCloseDeleteModal();
+        } else {
+            setToast({
+                message: result.message,
+                type: "error",
+            });
+            handleCloseDeleteModal();
+        }
     };
 
     return (
@@ -125,7 +170,7 @@ export function AdminProveedores() {
                     proveedores={proveedores}
                     loading={loading}
                     onEdit={handleOpenEdit}
-                    onDelete={removeProveedor}
+                    onDelete={handleRequestDelete}
                 />
             </div>
 
@@ -137,6 +182,51 @@ export function AdminProveedores() {
                 onSuccess={() => {
                     fetchProveedores();
                 }}
+            />
+
+            {/* ── Modal de Confirmación de Eliminación ── */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                onConfirm={handleConfirmDelete}
+                title="¿Eliminar Proveedor?"
+                confirmText="Eliminar Proveedor"
+                cancelText="Cancelar"
+                variant="danger"
+                icon="delete"
+                loading={isDeleting}
+                message={
+                    <span>
+                        ¿Estás seguro de que deseas eliminar a{" "}
+                        <strong className="text-on-surface font-semibold">
+                            {proveedorToDelete?.razon_social}
+                        </strong>
+                        ? Esta acción no se puede deshacer.
+                    </span>
+                }
+                extraContent={
+                    proveedorToDelete && Number(proveedorToDelete.saldo_adeudado) > 0 ? (
+                        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-error-container/50 border border-error/30 text-xs text-on-error-container font-medium">
+                            <span className="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">
+                                warning
+                            </span>
+                            <span>
+                                Este proveedor registra una deuda de{" "}
+                                <strong className="font-bold">
+                                    {formatCurrency(proveedorToDelete.saldo_adeudado)}
+                                </strong>
+                                . El sistema rechazará la eliminación hasta que se salde la cuenta corriente.
+                            </span>
+                        </div>
+                    ) : null
+                }
+            />
+
+            {/* ── Notificación Flotante Toast ── */}
+            <Toast
+                message={toast?.message}
+                type={toast?.type}
+                onClose={() => setToast(null)}
             />
         </div>
     );

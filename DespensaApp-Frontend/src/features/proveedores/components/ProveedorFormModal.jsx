@@ -61,7 +61,9 @@ export function ProveedorFormModal({ isOpen, onClose, editingProveedor, onSucces
             razon_social: formData.razon_social.trim(),
             telefono: formData.telefono.trim() || null,
             direccion: formData.direccion.trim() || null,
-            saldo_adeudado: formData.saldo_adeudado !== "" ? parseFloat(formData.saldo_adeudado) : 0,
+            ...(!editingProveedor && {
+                saldo_adeudado: formData.saldo_adeudado !== "" ? parseFloat(formData.saldo_adeudado) : 0,
+            }),
         };
 
         try {
@@ -138,13 +140,13 @@ export function ProveedorFormModal({ isOpen, onClose, editingProveedor, onSucces
                     value={formData.saldo_adeudado}
                     onChange={handleChange("saldo_adeudado")}
                     placeholder="0.00"
+                    disabled={Boolean(editingProveedor)}
+                    className="disabled:opacity-60 disabled:cursor-not-allowed"
                     error={errors.saldo_adeudado?.[0]}
                     helper={
-                        !editingProveedor ? (
-                            <span className="text-[11px] text-on-surface-variant">
-                                Deuda inicial (opcional)
-                            </span>
-                        ) : null
+                        <span className="text-[11px] text-on-surface-variant">
+                            {editingProveedor ? "No editable desde aquí" : "Deuda inicial (opcional)"}
+                        </span>
                     }
                 />
 

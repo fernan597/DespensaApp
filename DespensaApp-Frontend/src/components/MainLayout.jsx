@@ -40,6 +40,11 @@ const ROUTE_META = {
         title: "Directorio de Proveedores",
         icon: "local_shipping",
     },
+    "/admin/clientes": {
+        category: "Abastecimiento e Inventario",
+        title: "Directorio de Clientes",
+        icon: "group",
+    },
     "/admin/cuentas-corrientes-proveedores": {
         category: "Finanzas y Tesorería",
         title: "Cuentas Corrientes de Proveedores",
@@ -251,6 +256,12 @@ export function MainLayout() {
                                 to="/admin/proveedores"
                                 icon="local_shipping"
                                 label="Proveedores"
+                                onClick={closeMobileSidebar}
+                            />
+                            <SidebarNavLink
+                                to="/admin/clientes"
+                                icon="group"
+                                label="Clientes"
                                 onClick={closeMobileSidebar}
                             />
 

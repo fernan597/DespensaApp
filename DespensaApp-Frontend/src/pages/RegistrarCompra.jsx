@@ -7,6 +7,8 @@ import { BuscadorProducto } from "../features/products/components/BuscadorProduc
 import { DetalleCompra } from "../features/compras/components/DetalleCompra";
 import { PanelCompra } from "../features/compras/components/PanelCompra";
 import { registrarCompra } from "../services/compraService";
+import { generarTicketCompra } from "../utils/generarTickets";
+import { formatCurrency } from "../utils/formatters";
 
 // Un proveedor se considera inactivo si el backend lo informa (campo `activo` o `estado`).
 const esProveedorActivo = (p) =>
@@ -91,7 +93,8 @@ export function RegistrarCompra() {
             setLoadingCompra(true);
             setCompraError(null);
             const data = await registrarCompra(payload);
-            setCompraExitosa(data.compra ?? data);
+            const compraRegistrada = data.compra ?? data;
+            setCompraExitosa(compraRegistrada);
             limpiarCarrito();
             setNumeroComprobante("");
             setProveedorId(null);
@@ -99,6 +102,13 @@ export function RegistrarCompra() {
             // Refresca stock/costos y saldo del proveedor (si fue a crédito)
             fetchProducts();
             fetchProveedores();
+
+            // Genera el ticket de compra en PDF de forma asíncrona
+            try {
+                await generarTicketCompra(compraRegistrada);
+            } catch (errTicket) {
+                console.error("Error al generar el ticket de compra:", errTicket);
+            }
         } catch (err) {
             const primerError = err.data?.errors
                 ? Object.values(err.data.errors).flat()[0]
@@ -144,16 +154,39 @@ export function RegistrarCompra() {
                         <span className="material-symbols-outlined text-green-600 text-[22px]">
                             check_circle
                         </span>
-                        <p className="text-body-md font-semibold text-green-700">
-                            Compra {compraExitosa.id ? `#${compraExitosa.id} ` : ""}registrada correctamente.
-                        </p>
+                        <div>
+                            <p className="text-body-md font-semibold text-green-700">
+                                Compra {compraExitosa.id ? `#${compraExitosa.id} ` : ""}registrada correctamente.
+                            </p>
+                            {compraExitosa.total !== undefined && (
+                                <p className="text-xs text-green-800">
+                                    Total: {formatCurrency(compraExitosa.total)} · Modalidad: {compraExitosa.tipo_pago === "CUENTA_CORRIENTE" ? "Cuenta Corriente" : "Contado"}
+                                    {compraExitosa.proveedor && (
+                                        <> · Proveedor: {compraExitosa.proveedor.razon_social}</>
+                                    )}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <button
-                        onClick={() => setCompraExitosa(null)}
-                        className="text-on-surface-variant hover:text-on-surface"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">close</span>
-                    </button>
+                    <div className="flex items-center gap-sm shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => generarTicketCompra(compraExitosa)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-green-700 text-white hover:bg-green-800 text-xs font-semibold shadow-sm transition-colors active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">
+                                picture_as_pdf
+                            </span>
+                            <span>Descargar Ticket PDF</span>
+                        </button>
+                        <button
+                            onClick={() => setCompraExitosa(null)}
+                            className="text-on-surface-variant hover:text-on-surface p-1"
+                            title="Cerrar aviso"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
                 </div>
             )}
 

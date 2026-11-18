@@ -15,6 +15,7 @@ const CATEGORIA_LABELS = {
     COMPRAS: "Compras y pagos",
     CATALOGO: "Catálogo e inventario",
     PROVEEDORES: "Proveedores",
+    CLIENTES: "Clientes",
 };
 
 function Dato({ label, children }) {

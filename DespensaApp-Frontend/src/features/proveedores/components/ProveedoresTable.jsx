@@ -126,7 +126,7 @@ export function ProveedoresTable({ proveedores = [], loading = false, onEdit, on
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => onDelete(proveedor.id)}
+                                            onClick={() => onDelete(proveedor)}
                                             className="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors"
                                             title="Eliminar proveedor"
                                         >
