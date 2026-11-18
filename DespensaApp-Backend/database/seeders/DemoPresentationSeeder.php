@@ -149,6 +149,7 @@ class DemoPresentationSeeder extends Seeder
             'Paladini',
             'Ala',
             'Magistral',
+            'Generico',
         ];
 
         $marcas = [];

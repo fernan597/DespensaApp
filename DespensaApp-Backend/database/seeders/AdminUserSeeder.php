@@ -12,28 +12,29 @@ class AdminUserSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {
-        $adminEmail = env('ADMIN_EMAIL');
-        $adminPassword = env('ADMIN_PASSWORD');
+{
+    $usuarios = [
+        ['cfg' => 'admin',    'name' => 'Administrador',          'role' => 'admin'],
+        ['cfg' => 'despensa', 'name' => 'Administrador Despensa', 'role' => 'admin_despensa'],
+    ];
 
-        $despensaEmail = env('ADMIN_DESPENSA_EMAIL');
-        $despensaPassword = env('ADMIN_DESPENSA_PASSWORD');
+    foreach ($usuarios as $u) {
+        $email    = config("admin.{$u['cfg']}.email");
+        $password = config("admin.{$u['cfg']}.password");
+
+        if (! $email || ! $password) {
+            $this->command->warn("Faltan variables para '{$u['role']}', se omite.");
+            continue;
+        }
 
         User::updateOrCreate(
-            ['email' => $adminEmail],
+            ['email' => $email],
             [
-                'name'     => 'Administrador',
-                'password' => Hash::make($adminPassword),
-                'role'     => 'admin',
-            ]
-        );
-        User::updateOrCreate(
-            ['email' => $despensaEmail],
-            [
-                'name'     => 'Administrador Despensa',
-                'password' => Hash::make($despensaPassword),
-                'role'     => 'admin_despensa',
+                'name'     => $u['name'],
+                'password' => Hash::make($password),
+                'role'     => $u['role'],
             ]
         );
     }
+}
 }
