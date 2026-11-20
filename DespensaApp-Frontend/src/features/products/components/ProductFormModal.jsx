@@ -124,12 +124,6 @@ export function ProductFormModal({
                     onChange={(e) => setFormData({ ...formData, codigo_barra: e.target.value })}
                     placeholder="Ej: 779123456789"
                     error={errors.codigo_barra?.[0]}
-                    helper={
-                        <span className="text-[11px] text-on-surface-variant flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[14px] text-primary">barcode_scanner</span>
-                            Listo para escanear
-                        </span>
-                    }
                 />
 
                 {/* Nombre */}
