@@ -114,13 +114,7 @@ export function AdminProducts() {
                     inputRef={searchInputRef}
                     autoFocus
                 >
-                    <span
-                        className="hidden sm:flex items-center gap-1.5 text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full border border-outline-variant/40 shrink-0 select-none"
-                        title="Pistola lectora activa en cualquier momento"
-                    >
-                        <span className="material-symbols-outlined text-[16px] text-primary">barcode_scanner</span>
-                        <span>Pistola activa</span>
-                    </span>
+
                 </SearchBar>
 
                 {/* Tabla de Productos */}
